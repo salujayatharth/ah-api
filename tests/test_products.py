@@ -368,7 +368,7 @@ class TestProductCache:
         assert data["total_cached"] == 2
         assert data["valid"] == 1
         assert data["expired"] == 1
-        assert data["cache_duration_days"] == 7
+        assert data["cache_duration_days"] == 30
 
     def test_clear_expired_cache(self, client: TestClient, db_session):
         """Test clearing expired cache entries."""
