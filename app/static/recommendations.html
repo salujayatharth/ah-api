@@ -154,6 +154,49 @@
             font-size: 0.9rem;
         }
 
+        .control-group input[type="range"] {
+            padding: 0;
+            height: 8px;
+            background: linear-gradient(to right, #dc3545 0%, #ffc107 50%, #28a745 100%);
+            border: none;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid #00a0e2;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid #00a0e2;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            border-color: #0077b3;
+            transform: scale(1.1);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb:hover {
+            border-color: #0077b3;
+            transform: scale(1.1);
+        }
+
         .control-group .hint {
             font-size: 0.75rem;
             color: #999;
@@ -749,8 +792,8 @@
                             </div>
                         </span>
                     </label>
-                    <input type="number" id="min-confidence" value="0.3" min="0" max="1" step="0.1">
-                    <span class="hint">0-1, higher = more certain</span>
+                    <input type="range" id="min-confidence" value="0.5" min="0" max="1" step="0.05">
+                    <span class="hint" id="confidence-value">0.50 (50%)</span>
                 </div>
                 <div class="control-group">
                     <label>Min Purchases</label>
@@ -898,12 +941,20 @@
 
         function resetDefaults() {
             document.getElementById('days-ahead').value = '4';
-            document.getElementById('min-confidence').value = '0.3';
+            document.getElementById('min-confidence').value = '0.5';
             document.getElementById('min-purchases').value = '3';
             document.getElementById('max-avg-interval').value = '60';
             document.getElementById('max-days-since').value = '90';
             document.getElementById('decay-rate').value = '0.02';
+            updateConfidenceLabel();
             loadShoppingList();
+        }
+
+        function updateConfidenceLabel() {
+            const slider = document.getElementById('min-confidence');
+            const label = document.getElementById('confidence-value');
+            const value = parseFloat(slider.value);
+            label.textContent = `${value.toFixed(2)} (${(value * 100).toFixed(0)}%)`;
         }
 
         // Fetch helpers
@@ -1116,6 +1167,11 @@
             document.addEventListener('click', () => {
                 document.querySelectorAll('.info-icon').forEach(i => i.classList.remove('active'));
             });
+
+            // Confidence slider listener
+            const confidenceSlider = document.getElementById('min-confidence');
+            confidenceSlider.addEventListener('input', updateConfidenceLabel);
+            updateConfidenceLabel(); // Initial update
         });
 
         // Initialize
