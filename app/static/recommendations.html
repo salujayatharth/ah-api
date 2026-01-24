@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albert Heijn Smart Shopping List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #00a0e2 0%, #0077b3 100%);
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card .value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .card .value.urgent {
+            color: #dc3545;
+        }
+
+        .card .value.soon {
+            color: #fd7e14;
+        }
+
+        .card .value.savings {
+            color: #28a745;
+        }
+
+        .card .subtitle {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .controls-panel h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .control-group .hint {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .controls-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #00a0e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0077b3;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9e9e9;
+        }
+
+        /* Shopping List Sections */
+        .shopping-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .shopping-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shopping-section h2 .badge {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: normal;
+        }
+
+        .badge-needed {
+            background: #dc354520;
+            color: #dc3545;
+        }
+
+        .badge-soon {
+            background: #fd7e1420;
+            color: #fd7e14;
+        }
+
+        /* Shopping List Items */
+        .shopping-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .shopping-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            gap: 16px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .shopping-item:hover {
+            background: #f0f0f0;
+        }
+
+        .shopping-item.expanded {
+            background: #e8f4fc;
+        }
+
+        .item-info h4 {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .item-info .item-meta {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .item-info .item-meta span {
+            margin-right: 12px;
+        }
+
+        .item-urgency {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .urgency-needed {
+            background: #dc354520;
+            color: #dc3545;
+        }
+
+        .urgency-soon {
+            background: #fd7e1420;
+            color: #fd7e14;
+        }
+
+        .urgency-later {
+            background: #28a74520;
+            color: #28a745;
+        }
+
+        .item-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00a0e2;
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .item-details {
+            display: none;
+            grid-column: 1 / -1;
+            padding-top: 16px;
+            border-top: 1px solid #ddd;
+            margin-top: 8px;
+        }
+
+        .shopping-item.expanded .item-details {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .detail-item label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .detail-item .value {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* Consumption Patterns Table */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .table-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tr.clickable {
+            cursor: pointer;
+        }
+
+        .amount {
+            font-weight: 500;
+            color: #00a0e2;
+        }
+
+        .confidence-bar {
+            width: 60px;
+            height: 8px;
+            background: #e9e9e9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .confidence-high {
+            background: #28a745;
+        }
+
+        .confidence-medium {
+            background: #ffc107;
+        }
+
+        .confidence-low {
+            background: #dc3545;
+        }
+
+        /* Product Detail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 90%;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 4px 8px;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .explanation-box {
+            background: #e8f4fc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .purchase-history h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .purchase-history table {
+            font-size: 0.9rem;
+        }
+
+        /* Search box */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            background: #00a0e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .search-box button:hover {
+            background: #0077b3;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00a0e2;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error state */
+        .error {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state p {
+            margin-bottom: 10px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #f9f9f9;
+        }
+
+        .tab.active {
+            color: #00a0e2;
+            border-bottom-color: #00a0e2;
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Sortable headers */
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 24px;
+        }
+
+        th.sortable:hover {
+            background-color: #f0f0f0;
+        }
+
+        th.sortable::after {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-top-color: #ccc;
+            margin-top: 3px;
+        }
+
+        th.sortable::before {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #ccc;
+            margin-top: -9px;
+        }
+
+        th.sortable.asc::after {
+            border-top-color: transparent;
+        }
+
+        th.sortable.asc::before {
+            border-bottom-color: #00a0e2;
+        }
+
+        th.sortable.desc::after {
+            border-top-color: #00a0e2;
+        }
+
+        th.sortable.desc::before {
+            border-bottom-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Smart Shopping List</h1>
+                <p>AI-powered recommendations based on your purchase patterns</p>
+            </div>
+            <div class="nav-links">
+                <a href="/static/index.html">Home</a>
+                <a href="/static/analytics.html">Analytics</a>
+                <a href="/static/receipts.html">Receipts</a>
+            </div>
+        </header>
+
+        <div id="error-container"></div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards" id="summary-cards">
+            <div class="card">
+                <h3>Items Needed</h3>
+                <div class="value urgent" id="needed-count">-</div>
+                <div class="subtitle">Within your planning horizon</div>
+            </div>
+            <div class="card">
+                <h3>Might Need Soon</h3>
+                <div class="value soon" id="soon-count">-</div>
+                <div class="subtitle">Stock up if convenient</div>
+            </div>
+            <div class="card">
+                <h3>Estimated Total</h3>
+                <div class="value" id="estimated-total">-</div>
+                <div class="subtitle">Based on median prices</div>
+            </div>
+            <div class="card">
+                <h3>Products Analyzed</h3>
+                <div class="value" id="products-analyzed">-</div>
+                <div class="subtitle" id="filtered-out">-</div>
+            </div>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <h2>Customize Recommendations</h2>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>Planning Horizon</label>
+                    <select id="days-ahead">
+                        <option value="2">2 days</option>
+                        <option value="4" selected>4 days (2x/week)</option>
+                        <option value="7">1 week</option>
+                        <option value="14">2 weeks</option>
+                    </select>
+                    <span class="hint">How far ahead to plan</span>
+                </div>
+                <div class="control-group">
+                    <label>Min Confidence</label>
+                    <input type="number" id="min-confidence" value="0.3" min="0" max="1" step="0.1">
+                    <span class="hint">0-1, higher = more certain</span>
+                </div>
+                <div class="control-group">
+                    <label>Min Purchases</label>
+                    <input type="number" id="min-purchases" value="3" min="1" max="10">
+                    <span class="hint">Minimum purchase count</span>
+                </div>
+                <div class="control-group">
+                    <label>Max Avg Interval</label>
+                    <input type="number" id="max-avg-interval" value="60" min="7" max="180">
+                    <span class="hint">Days between purchases</span>
+                </div>
+                <div class="control-group">
+                    <label>Max Days Since Last</label>
+                    <input type="number" id="max-days-since" value="90" min="14" max="365">
+                    <span class="hint">Exclude old items</span>
+                </div>
+                <div class="control-group">
+                    <label>Decay Rate</label>
+                    <input type="number" id="decay-rate" value="0.02" min="0.001" max="0.1" step="0.005">
+                    <span class="hint">Weight recent purchases</span>
+                </div>
+            </div>
+            <div class="controls-actions">
+                <button class="btn btn-primary" onclick="loadShoppingList()">Update Recommendations</button>
+                <button class="btn btn-secondary" onclick="resetDefaults()">Reset Defaults</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="shopping-list">Shopping List</button>
+            <button class="tab" data-tab="consumption-patterns">Consumption Patterns</button>
+        </div>
+
+        <!-- Shopping List Tab -->
+        <div id="shopping-list-tab" class="tab-content active">
+            <!-- Needed Items -->
+            <div class="shopping-section" id="needed-section">
+                <h2>
+                    Items You Need
+                    <span class="badge badge-needed" id="needed-badge">0</span>
+                </h2>
+                <div class="shopping-list" id="needed-list">
+                    <div class="loading">Loading recommendations...</div>
+                </div>
+            </div>
+
+            <!-- Might Need Soon -->
+            <div class="shopping-section" id="soon-section">
+                <h2>
+                    Might Need Soon
+                    <span class="badge badge-soon" id="soon-badge">0</span>
+                </h2>
+                <div class="shopping-list" id="soon-list">
+                    <div class="loading">Loading recommendations...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consumption Patterns Tab -->
+        <div id="consumption-patterns-tab" class="tab-content">
+            <div class="table-card">
+                <h2>Product Consumption Patterns</h2>
+                <div class="search-box">
+                    <input type="text" id="pattern-search" placeholder="Search products...">
+                    <button onclick="filterPatterns()">Search</button>
+                </div>
+                <table id="patterns-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="product_name">Product</th>
+                            <th class="sortable" data-sort="purchase_count">Purchases</th>
+                            <th class="sortable" data-sort="median_interval_days">Median Interval</th>
+                            <th class="sortable" data-sort="consumption_rate_per_day">Consumption/Day</th>
+                            <th class="sortable desc" data-sort="days_until_needed">Days Until Needed</th>
+                            <th class="sortable" data-sort="estimated_inventory">Est. Inventory</th>
+                            <th class="sortable" data-sort="confidence">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patterns-tbody">
+                        <tr><td colspan="7" class="loading">Loading patterns...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-product-name">Product Name</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="explanation-box" id="modal-explanation">
+                    Loading...
+                </div>
+                <div class="stats-grid" id="modal-stats">
+                </div>
+                <div class="purchase-history">
+                    <h3>Purchase History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-history">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let consumptionPatterns = [];
+        let patternSort = { by: 'days_until_needed', order: 'asc' };
+        let patternSearchTerm = '';
+
+        // API Base
+        const API_BASE = '/analytics/recommendations';
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('nl-NL', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('nl-NL', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatNumber(num, decimals = 1) {
+            return Number(num).toFixed(decimals);
+        }
+
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function clearError() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+
+        function getParams() {
+            return {
+                days_ahead: document.getElementById('days-ahead').value,
+                min_confidence: document.getElementById('min-confidence').value,
+                min_purchases: document.getElementById('min-purchases').value,
+                max_avg_interval: document.getElementById('max-avg-interval').value,
+                max_days_since_last: document.getElementById('max-days-since').value,
+                decay_rate: document.getElementById('decay-rate').value,
+            };
+        }
+
+        function resetDefaults() {
+            document.getElementById('days-ahead').value = '4';
+            document.getElementById('min-confidence').value = '0.3';
+            document.getElementById('min-purchases').value = '3';
+            document.getElementById('max-avg-interval').value = '60';
+            document.getElementById('max-days-since').value = '90';
+            document.getElementById('decay-rate').value = '0.02';
+            loadShoppingList();
+            loadConsumptionPatterns();
+        }
+
+        // Fetch helpers
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+
+        // Load Shopping List
+        async function loadShoppingList() {
+            try {
+                const params = getParams();
+                const queryString = new URLSearchParams(params).toString();
+                const data = await fetchData(`${API_BASE}/shopping-list?${queryString}`);
+
+                // Update summary cards
+                document.getElementById('needed-count').textContent = data.needed_items.length;
+                document.getElementById('soon-count').textContent = data.might_need_soon.length;
+                document.getElementById('estimated-total').textContent = formatCurrency(data.estimated_total);
+                document.getElementById('products-analyzed').textContent = data.items_analyzed;
+                document.getElementById('filtered-out').textContent = `${data.items_filtered_out} filtered out`;
+
+                // Update badges
+                document.getElementById('needed-badge').textContent = data.needed_items.length;
+                document.getElementById('soon-badge').textContent = data.might_need_soon.length;
+
+                // Render needed items
+                renderShoppingList('needed-list', data.needed_items, 'needed');
+
+                // Render might need soon items
+                renderShoppingList('soon-list', data.might_need_soon, 'soon');
+
+            } catch (error) {
+                showError('Failed to load shopping list recommendations');
+                console.error(error);
+            }
+        }
+
+        function renderShoppingList(containerId, items, urgencyClass) {
+            const container = document.getElementById(containerId);
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No items in this category</p></div>';
+                return;
+            }
+
+            container.innerHTML = items.map((item, index) => `
+                <div class="shopping-item" onclick="toggleItemDetails(this)" data-product="${encodeURIComponent(item.product_name)}">
+                    <div class="item-info">
+                        <h4>${item.product_name}</h4>
+                        <div class="item-meta">
+                            <span>Qty: ${item.suggested_quantity}</span>
+                            <span>Need in ~${formatNumber(item.estimated_days_until_needed, 0)} days</span>
+                            <span>Bought ${item.purchase_count}x</span>
+                        </div>
+                    </div>
+                    <div class="item-urgency urgency-${item.urgency}">
+                        ${item.urgency === 'needed' ? 'Needed' : item.urgency === 'soon' ? 'Soon' : 'Later'}
+                    </div>
+                    <div class="item-price">${formatCurrency(item.estimated_cost)}</div>
+                    <div class="item-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Median Price</label>
+                                <div class="value">${formatCurrency(item.median_price)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Last Purchased</label>
+                                <div class="value">${formatDate(item.last_purchase_date)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Confidence</label>
+                                <div class="value">${(item.confidence * 100).toFixed(0)}%</div>
+                            </div>
+                            <div class="detail-item">
+                                <label>Times Purchased</label>
+                                <div class="value">${item.purchase_count}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <button class="btn btn-secondary" onclick="event.stopPropagation(); showProductDetail('${encodeURIComponent(item.product_name)}')">
+                                View Full Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleItemDetails(element) {
+            element.classList.toggle('expanded');
+        }
+
+        // Load Consumption Patterns
+        async function loadConsumptionPatterns() {
+            try {
+                const params = getParams();
+                const queryString = new URLSearchParams({
+                    decay_rate: params.decay_rate,
+                    min_purchases: params.min_purchases,
+                    max_avg_interval: params.max_avg_interval,
+                    max_days_since_last: params.max_days_since_last,
+                }).toString();
+
+                const data = await fetchData(`${API_BASE}/consumption-patterns?${queryString}`);
+                consumptionPatterns = data.products;
+                renderPatternsTable();
+            } catch (error) {
+                document.getElementById('patterns-tbody').innerHTML =
+                    '<tr><td colspan="7" class="error">Failed to load consumption patterns</td></tr>';
+                console.error(error);
+            }
+        }
+
+        function filterPatterns() {
+            patternSearchTerm = document.getElementById('pattern-search').value.toLowerCase();
+            renderPatternsTable();
+        }
+
+        function renderPatternsTable() {
+            const tbody = document.getElementById('patterns-tbody');
+
+            let filtered = consumptionPatterns;
+            if (patternSearchTerm) {
+                filtered = filtered.filter(p =>
+                    p.product_name.toLowerCase().includes(patternSearchTerm)
+                );
+            }
+
+            // Sort
+            filtered.sort((a, b) => {
+                let aVal = a[patternSort.by];
+                let bVal = b[patternSort.by];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (patternSort.order === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No patterns found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const confidenceClass = p.confidence >= 0.6 ? 'high' : p.confidence >= 0.4 ? 'medium' : 'low';
+                return `
+                    <tr class="clickable" onclick="showProductDetail('${encodeURIComponent(p.product_name)}')">
+                        <td>${p.product_name}</td>
+                        <td>${p.purchase_count}</td>
+                        <td>${formatNumber(p.median_interval_days)} days</td>
+                        <td>${formatNumber(p.consumption_rate_per_day, 3)}</td>
+                        <td class="amount">${formatNumber(p.days_until_needed, 0)} days</td>
+                        <td>${formatNumber(p.estimated_inventory, 1)}</td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill confidence-${confidenceClass}" style="width: ${p.confidence * 100}%"></div>
+                            </div>
+                            <span style="font-size: 0.8rem; color: #666;">${(p.confidence * 100).toFixed(0)}%</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Product Detail Modal
+        async function showProductDetail(encodedProductName) {
+            const productName = decodeURIComponent(encodedProductName);
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('active');
+
+            document.getElementById('modal-product-name').textContent = productName;
+            document.getElementById('modal-explanation').textContent = 'Loading...';
+            document.getElementById('modal-stats').innerHTML = '';
+            document.getElementById('modal-history').innerHTML = '<tr><td colspan="4" class="loading">Loading...</td></tr>';
+
+            try {
+                const params = getParams();
+                const data = await fetchData(
+                    `${API_BASE}/product/${encodeURIComponent(productName)}?decay_rate=${params.decay_rate}`
+                );
+
+                // Explanation
+                document.getElementById('modal-explanation').textContent = data.prediction_explanation;
+
+                // Stats
+                const pattern = data.consumption_pattern;
+                document.getElementById('modal-stats').innerHTML = `
+                    <div class="stat-card">
+                        <label>Purchase Count</label>
+                        <div class="value">${pattern.purchase_count}</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Median Interval</label>
+                        <div class="value">${formatNumber(pattern.median_interval_days)} days</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Weighted Avg</label>
+                        <div class="value">${formatNumber(pattern.weighted_avg_interval_days)} days</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Consumption Rate</label>
+                        <div class="value">${formatNumber(pattern.consumption_rate_per_day, 3)}/day</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Est. Inventory</label>
+                        <div class="value">${formatNumber(pattern.estimated_inventory, 1)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Days Until Needed</label>
+                        <div class="value">${formatNumber(pattern.days_until_needed, 0)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Median Price</label>
+                        <div class="value">${formatCurrency(pattern.median_price)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Confidence</label>
+                        <div class="value">${(pattern.confidence * 100).toFixed(0)}%</div>
+                    </div>
+                `;
+
+                // Purchase history
+                document.getElementById('modal-history').innerHTML = data.purchase_history.map(h => `
+                    <tr>
+                        <td>${formatDate(h.date)}</td>
+                        <td>${h.quantity}</td>
+                        <td>${h.unit_price ? formatCurrency(h.unit_price) : '-'}</td>
+                        <td>${h.unit_price ? formatCurrency(h.quantity * h.unit_price) : '-'}</td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                document.getElementById('modal-explanation').textContent = 'Failed to load product details';
+                console.error(error);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('product-modal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('product-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Sort handling for patterns table
+        document.querySelectorAll('#patterns-table th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const column = th.dataset.sort;
+                if (patternSort.by === column) {
+                    patternSort.order = patternSort.order === 'asc' ? 'desc' : 'asc';
+                } else {
+                    patternSort.by = column;
+                    patternSort.order = 'asc';
+                }
+
+                // Update header classes
+                document.querySelectorAll('#patterns-table th.sortable').forEach(h => {
+                    h.classList.remove('asc', 'desc');
+                    if (h.dataset.sort === patternSort.by) {
+                        h.classList.add(patternSort.order);
+                    }
+                });
+
+                renderPatternsTable();
+            });
+        });
+
+        // Pattern search on enter
+        document.getElementById('pattern-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                filterPatterns();
+            }
+        });
+
+        // Initialize
+        async function init() {
+            clearError();
+            await Promise.all([
+                loadShoppingList(),
+                loadConsumptionPatterns(),
+            ]);
+        }
+
+        init();
+    </script>
+</body>
+</html>

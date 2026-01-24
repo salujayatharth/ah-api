@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albert Heijn Receipts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #00a0e2 0%, #0077b3 100%);
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card .value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .card .subtitle {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters input, .filters select {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .filters input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filters button {
+            padding: 10px 20px;
+            background: #00a0e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .filters button:hover {
+            background: #0077b3;
+        }
+
+        /* Receipt List */
+        .receipts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .receipt-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .receipt-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .receipt-card.expanded {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .receipt-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .receipt-header .left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .receipt-date {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .receipt-store {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .receipt-header .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .receipt-items-count {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .receipt-discount {
+            color: #28a745;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .receipt-total {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .expand-icon {
+            color: #888;
+            transition: transform 0.2s;
+        }
+
+        .receipt-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Receipt Details */
+        .receipt-details {
+            display: none;
+            border-top: 1px solid #eee;
+            padding: 20px;
+        }
+
+        .receipt-card.expanded .receipt-details {
+            display: block;
+        }
+
+        .receipt-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meta-item {
+            font-size: 0.9rem;
+        }
+
+        .meta-item label {
+            color: #888;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .meta-item span {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Items Table */
+        .items-section h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .amount {
+            font-weight: 500;
+            color: #00a0e2;
+        }
+
+        .discount-row td {
+            color: #28a745;
+        }
+
+        /* Discounts */
+        .discounts-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+
+        .discounts-section h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #28a745;
+        }
+
+        /* Totals */
+        .totals-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #ddd;
+            text-align: right;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 40px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .total-row.grand-total {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            padding-top: 8px;
+            margin-top: 8px;
+            border-top: 2px solid #333;
+        }
+
+        .total-row .label {
+            color: #666;
+        }
+
+        .total-row .value {
+            min-width: 100px;
+        }
+
+        .total-row.discount .value {
+            color: #28a745;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            border: 1px solid #00a0e2;
+            background: white;
+            color: #00a0e2;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #00a0e2;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            border-color: #ddd;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: #666;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00a0e2;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Error state */
+        .error {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .receipt-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .receipt-header .right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filters input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Receipts</h1>
+                <p>Browse your shopping history</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/static/index.html" class="nav-link">Home</a>
+                <a href="/static/analytics.html" class="nav-link">Analytics</a>
+                <a href="/static/recommendations.html" class="nav-link">Recommendations</a>
+            </div>
+        </header>
+
+        <div id="error-container"></div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total Receipts</h3>
+                <div class="value" id="total-receipts">-</div>
+            </div>
+            <div class="card">
+                <h3>Total Spent</h3>
+                <div class="value" id="total-spent">-</div>
+            </div>
+            <div class="card">
+                <h3>Total Saved</h3>
+                <div class="value" style="color: #28a745;" id="total-saved">-</div>
+            </div>
+            <div class="card">
+                <h3>Avg per Receipt</h3>
+                <div class="value" id="avg-receipt">-</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <input type="text" id="search-input" placeholder="Search receipts...">
+            <select id="store-filter">
+                <option value="">All Stores</option>
+            </select>
+            <select id="sort-select">
+                <option value="transaction_moment-desc">Newest First</option>
+                <option value="transaction_moment-asc">Oldest First</option>
+                <option value="total_amount-desc">Highest Amount</option>
+                <option value="total_amount-asc">Lowest Amount</option>
+            </select>
+            <button onclick="applyFilters()">Search</button>
+        </div>
+
+        <!-- Receipts List -->
+        <div id="receipts-container" class="receipts-list">
+            <div class="loading">Loading receipts...</div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prev-btn" onclick="changePage(-1)" disabled>Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-btn" onclick="changePage(1)">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const API_BASE = '/analytics';
+        let currentPage = 0;
+        const pageSize = 20;
+        let totalReceipts = 0;
+        let currentSort = { by: 'transaction_moment', order: 'desc' };
+        let expandedReceipts = new Set();
+        let receiptDetails = {};
+        let stores = [];
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('nl-NL', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('nl-NL', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatTime(dateStr) {
+            return new Date(dateStr).toLocaleTimeString('nl-NL', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('error-container').innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Load summary
+        async function loadSummary() {
+            try {
+                const response = await fetch(`${API_BASE}/summary`);
+                const data = await response.json();
+                document.getElementById('total-receipts').textContent = data.total_receipts;
+                document.getElementById('total-spent').textContent = formatCurrency(data.total_spending);
+                document.getElementById('total-saved').textContent = formatCurrency(data.total_savings);
+                document.getElementById('avg-receipt').textContent = formatCurrency(data.average_per_receipt);
+            } catch (error) {
+                console.error('Failed to load summary:', error);
+            }
+        }
+
+        // Load stores for filter
+        async function loadStores() {
+            try {
+                const response = await fetch(`${API_BASE}/stores?limit=100`);
+                const data = await response.json();
+                stores = data.stores;
+
+                const select = document.getElementById('store-filter');
+                stores.forEach(store => {
+                    if (store.store_name) {
+                        const option = document.createElement('option');
+                        option.value = store.store_name;
+                        option.textContent = store.store_name;
+                        select.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load stores:', error);
+            }
+        }
+
+        // Load receipts
+        async function loadReceipts() {
+            const container = document.getElementById('receipts-container');
+            container.innerHTML = '<div class="loading">Loading receipts...</div>';
+
+            try {
+                const sortParams = `sort_by=${currentSort.by}&sort_order=${currentSort.order}`;
+                const response = await fetch(`${API_BASE}/receipts?offset=${currentPage * pageSize}&limit=${pageSize}&${sortParams}`);
+                const data = await response.json();
+
+                totalReceipts = data.total;
+
+                if (data.receipts.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No receipts found</div>';
+                    document.getElementById('pagination').style.display = 'none';
+                    return;
+                }
+
+                container.innerHTML = data.receipts.map(receipt => renderReceiptCard(receipt)).join('');
+                document.getElementById('pagination').style.display = 'flex';
+                updatePagination();
+            } catch (error) {
+                container.innerHTML = '<div class="error">Failed to load receipts</div>';
+                console.error('Failed to load receipts:', error);
+            }
+        }
+
+        function renderReceiptCard(receipt) {
+            const isExpanded = expandedReceipts.has(receipt.id);
+            const discount = receipt.discount_total ? Math.abs(receipt.discount_total) : 0;
+
+            return `
+                <div class="receipt-card ${isExpanded ? 'expanded' : ''}" id="receipt-${receipt.id}">
+                    <div class="receipt-header" onclick="toggleReceipt('${receipt.id}')">
+                        <div class="left">
+                            <span class="receipt-date">${formatDate(receipt.transaction_moment)}</span>
+                            <span class="receipt-store">${receipt.store_name || 'Unknown Store'}${receipt.store_city ? `, ${receipt.store_city}` : ''}</span>
+                        </div>
+                        <div class="right">
+                            <span class="receipt-items-count">${receipt.item_count} items</span>
+                            ${discount > 0 ? `<span class="receipt-discount">-${formatCurrency(discount)}</span>` : ''}
+                            <span class="receipt-total">${formatCurrency(receipt.total_amount)}</span>
+                            <span class="expand-icon">&#9660;</span>
+                        </div>
+                    </div>
+                    <div class="receipt-details" id="details-${receipt.id}">
+                        <div class="loading">Loading details...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function toggleReceipt(receiptId) {
+            const card = document.getElementById(`receipt-${receiptId}`);
+            const detailsContainer = document.getElementById(`details-${receiptId}`);
+
+            if (expandedReceipts.has(receiptId)) {
+                expandedReceipts.delete(receiptId);
+                card.classList.remove('expanded');
+            } else {
+                expandedReceipts.add(receiptId);
+                card.classList.add('expanded');
+
+                // Load details if not already loaded
+                if (!receiptDetails[receiptId]) {
+                    try {
+                        const response = await fetch(`${API_BASE}/receipts/${receiptId}`);
+                        receiptDetails[receiptId] = await response.json();
+                    } catch (error) {
+                        detailsContainer.innerHTML = '<div class="error">Failed to load receipt details</div>';
+                        return;
+                    }
+                }
+
+                detailsContainer.innerHTML = renderReceiptDetails(receiptDetails[receiptId]);
+            }
+        }
+
+        function renderReceiptDetails(receipt) {
+            const subtotal = receipt.subtotal || receipt.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+            const discount = receipt.discount_total ? Math.abs(receipt.discount_total) : 0;
+
+            return `
+                <div class="receipt-meta">
+                    <div class="meta-item">
+                        <label>Date & Time</label>
+                        <span>${formatDate(receipt.transaction_moment)} at ${formatTime(receipt.transaction_moment)}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Store</label>
+                        <span>${receipt.store_name || 'Unknown'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Address</label>
+                        <span>${receipt.store_street || '-'}${receipt.store_postal_code ? `, ${receipt.store_postal_code}` : ''} ${receipt.store_city || ''}</span>
+                    </div>
+                    ${receipt.checkout_lane ? `
+                    <div class="meta-item">
+                        <label>Checkout Lane</label>
+                        <span>${receipt.checkout_lane}</span>
+                    </div>
+                    ` : ''}
+                    ${receipt.payment_method ? `
+                    <div class="meta-item">
+                        <label>Payment Method</label>
+                        <span>${receipt.payment_method}</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="items-section">
+                    <h3>Items (${receipt.items.length})</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-right">Qty</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${receipt.items.map(item => `
+                                <tr>
+                                    <td>${item.product_name}</td>
+                                    <td class="text-right">${item.quantity}</td>
+                                    <td class="text-right">${item.unit_price ? formatCurrency(item.unit_price) : '-'}</td>
+                                    <td class="text-right amount">${item.line_total ? formatCurrency(item.line_total) : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                ${receipt.discounts && receipt.discounts.length > 0 ? `
+                <div class="discounts-section">
+                    <h3>Discounts Applied</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Discount</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${receipt.discounts.map(d => `
+                                <tr class="discount-row">
+                                    <td>${d.discount_name || d.discount_type || 'Discount'}</td>
+                                    <td class="text-right">-${formatCurrency(Math.abs(d.discount_amount))}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <div class="totals-section">
+                    <div class="total-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value">${formatCurrency(subtotal)}</span>
+                    </div>
+                    ${discount > 0 ? `
+                    <div class="total-row discount">
+                        <span class="label">Total Discount</span>
+                        <span class="value">-${formatCurrency(discount)}</span>
+                    </div>
+                    ` : ''}
+                    <div class="total-row grand-total">
+                        <span class="label">Total</span>
+                        <span class="value">${formatCurrency(receipt.total_amount)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(totalReceipts / pageSize);
+            document.getElementById('page-info').textContent = `Page ${currentPage + 1} of ${totalPages}`;
+            document.getElementById('prev-btn').disabled = currentPage === 0;
+            document.getElementById('next-btn').disabled = currentPage >= totalPages - 1;
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            expandedReceipts.clear();
+            loadReceipts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function applyFilters() {
+            const sortValue = document.getElementById('sort-select').value;
+            const [sortBy, sortOrder] = sortValue.split('-');
+            currentSort = { by: sortBy, order: sortOrder };
+            currentPage = 0;
+            expandedReceipts.clear();
+            receiptDetails = {};
+            loadReceipts();
+        }
+
+        // Event listeners
+        document.getElementById('sort-select').addEventListener('change', applyFilters);
+
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Initialize
+        async function init() {
+            await Promise.all([
+                loadSummary(),
+                loadStores(),
+                loadReceipts()
+            ]);
+        }
+
+        init();
+    </script>
+</body>
+</html>

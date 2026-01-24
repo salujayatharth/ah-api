@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albert Heijn Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #00a0e2 0%, #0077b3 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .card-icon.analytics {
+            background: linear-gradient(135deg, #00a0e2 0%, #0077b3 100%);
+        }
+
+        .card-icon.receipts {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
+        .card-icon.recommendations {
+            background: linear-gradient(135deg, #fd7e14 0%, #e55d00 100%);
+        }
+
+        .dashboard-card h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .dashboard-card p {
+            color: #666;
+            font-size: 0.95rem;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        .card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .feature-tag {
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .card-arrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #00a0e2;
+            font-weight: 500;
+        }
+
+        .card-arrow svg {
+            transition: transform 0.2s;
+        }
+
+        .dashboard-card:hover .card-arrow svg {
+            transform: translateX(4px);
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+        }
+
+        .quick-stats h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .stat-item .value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .stat-item .label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Status */
+        .status-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .status-section h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.ok {
+            background: #28a745;
+        }
+
+        .status-indicator.warning {
+            background: #ffc107;
+        }
+
+        .status-indicator.error {
+            background: #dc3545;
+        }
+
+        .status-indicator.loading {
+            background: #6c757d;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-item .info {
+            flex-grow: 1;
+        }
+
+        .status-item .info .title {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .status-item .info .detail {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #00a0e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0077b3;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #00a0e2;
+            color: #00a0e2;
+        }
+
+        .btn-outline:hover {
+            background: #00a0e2;
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #00a0e2;
+            text-decoration: none;
+        }
+
+        /* Loading */
+        .loading-text::after {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #00a0e2;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AH</div>
+            <h1>Albert Heijn Dashboard</h1>
+            <p>Your personal grocery analytics and smart shopping assistant</p>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <h3>Quick Overview</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="value" id="total-receipts">-</div>
+                    <div class="label">Total Receipts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="total-spent">-</div>
+                    <div class="label">Total Spent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="total-saved">-</div>
+                    <div class="label">Total Saved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="items-needed">-</div>
+                    <div class="label">Items Needed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <a href="/static/analytics.html" class="dashboard-card">
+                <div class="card-icon analytics">
+                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                        <path d="M3 13h2v8H3v-8zm6-6h2v14H9V7zm6-4h2v18h-2V3zm6 8h2v10h-2V11z"/>
+                    </svg>
+                </div>
+                <h2>Analytics</h2>
+                <p>Visualize your spending patterns, track expenses over time, and discover insights about your grocery shopping habits.</p>
+                <div class="card-features">
+                    <span class="feature-tag">Spending Charts</span>
+                    <span class="feature-tag">Store Stats</span>
+                    <span class="feature-tag">Top Products</span>
+                    <span class="feature-tag">Savings</span>
+                </div>
+                <div class="card-arrow">
+                    View Analytics
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/static/receipts.html" class="dashboard-card">
+                <div class="card-icon receipts">
+                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
+                <h2>Receipts</h2>
+                <p>Browse your complete purchase history with detailed receipt views, item breakdowns, and discount information.</p>
+                <div class="card-features">
+                    <span class="feature-tag">Full History</span>
+                    <span class="feature-tag">Item Details</span>
+                    <span class="feature-tag">Discounts</span>
+                    <span class="feature-tag">Search</span>
+                </div>
+                <div class="card-arrow">
+                    View Receipts
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/static/recommendations.html" class="dashboard-card">
+                <div class="card-icon recommendations">
+                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <h2>Smart Shopping List</h2>
+                <p>AI-powered recommendations predict what you'll need based on your consumption patterns and purchase history.</p>
+                <div class="card-features">
+                    <span class="feature-tag">AI Predictions</span>
+                    <span class="feature-tag">Consumption Patterns</span>
+                    <span class="feature-tag">Smart Timing</span>
+                </div>
+                <div class="card-arrow">
+                    View Recommendations
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-section">
+            <h3>System Status</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-indicator loading" id="auth-indicator"></div>
+                    <div class="info">
+                        <div class="title">Authentication</div>
+                        <div class="detail" id="auth-status">Checking...</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator loading" id="db-indicator"></div>
+                    <div class="info">
+                        <div class="title">Database</div>
+                        <div class="detail" id="db-status">Checking...</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator loading" id="sync-indicator"></div>
+                    <div class="info">
+                        <div class="title">Last Sync</div>
+                        <div class="detail" id="sync-status">Checking...</div>
+                    </div>
+                    <button class="btn btn-outline" id="sync-btn" onclick="syncReceipts()" style="display: none;">Sync</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>API Documentation available at <a href="/docs">/docs</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('nl-NL', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('nl-NL', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        async function loadQuickStats() {
+            try {
+                const [summary, shoppingList] = await Promise.all([
+                    fetch('/analytics/summary').then(r => r.json()).catch(() => null),
+                    fetch('/analytics/recommendations/shopping-list?days_ahead=4').then(r => r.json()).catch(() => null)
+                ]);
+
+                if (summary) {
+                    document.getElementById('total-receipts').textContent = summary.total_receipts;
+                    document.getElementById('total-spent').textContent = formatCurrency(summary.total_spending);
+                    document.getElementById('total-saved').textContent = formatCurrency(summary.total_savings);
+
+                    // Update DB status
+                    document.getElementById('db-indicator').className = 'status-indicator ok';
+                    document.getElementById('db-status').textContent = `${summary.total_receipts} receipts`;
+                } else {
+                    document.getElementById('db-indicator').className = 'status-indicator warning';
+                    document.getElementById('db-status').textContent = 'No data';
+                }
+
+                if (shoppingList) {
+                    document.getElementById('items-needed').textContent = shoppingList.needed_items.length;
+                } else {
+                    document.getElementById('items-needed').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/receipts/auth/status');
+                const data = await response.json();
+
+                const indicator = document.getElementById('auth-indicator');
+                const status = document.getElementById('auth-status');
+                const syncBtn = document.getElementById('sync-btn');
+
+                if (data.authenticated) {
+                    indicator.className = 'status-indicator ok';
+                    status.textContent = 'Connected';
+                    syncBtn.style.display = 'block';
+                } else {
+                    indicator.className = 'status-indicator warning';
+                    status.textContent = 'Not authenticated';
+                    syncBtn.style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('auth-indicator').className = 'status-indicator error';
+                document.getElementById('auth-status').textContent = 'Error';
+            }
+        }
+
+        async function checkSyncStatus() {
+            try {
+                const response = await fetch('/analytics/receipts?limit=1&sort_by=transaction_moment&sort_order=desc');
+                const data = await response.json();
+
+                const indicator = document.getElementById('sync-indicator');
+                const status = document.getElementById('sync-status');
+
+                if (data.receipts && data.receipts.length > 0) {
+                    const lastReceipt = data.receipts[0];
+                    indicator.className = 'status-indicator ok';
+                    status.textContent = formatDate(lastReceipt.transaction_moment);
+                } else {
+                    indicator.className = 'status-indicator warning';
+                    status.textContent = 'No receipts synced';
+                }
+            } catch (error) {
+                document.getElementById('sync-indicator').className = 'status-indicator error';
+                document.getElementById('sync-status').textContent = 'Error';
+            }
+        }
+
+        async function syncReceipts() {
+            const btn = document.getElementById('sync-btn');
+            btn.textContent = 'Syncing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/receipts/sync', { method: 'POST' });
+                const data = await response.json();
+                alert(`Synced ${data.new_receipts} new receipts!`);
+                location.reload();
+            } catch (error) {
+                alert('Sync failed: ' + error.message);
+            } finally {
+                btn.textContent = 'Sync';
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize
+        loadQuickStats();
+        checkAuthStatus();
+        checkSyncStatus();
+    </script>
+</body>
+</html>

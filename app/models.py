@@ -43,3 +43,26 @@ class ReceiptsListResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+# Sync endpoint models
+class SyncedReceiptSummary(BaseModel):
+    id: str
+    transaction_moment: datetime
+    total_amount: float
+    store_name: Optional[str] = None
+
+
+class SyncError(BaseModel):
+    receipt_id: str
+    error: str
+
+
+class SyncResultResponse(BaseModel):
+    status: str  # "success", "partial", "error"
+    synced_count: int
+    skipped_count: int
+    error_count: int
+    total_in_db: int
+    synced_receipts: list[SyncedReceiptSummary]
+    errors: list[SyncError]

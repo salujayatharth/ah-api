@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from httpx import HTTPStatusError
+from sqlalchemy.orm import Session
 
 from app.client import AHClient, TOKEN_FILE
 from app.config import get_settings, Settings
+from app.database import get_db
+from app.models import SyncResultResponse, SyncedReceiptSummary, SyncError
+from app.sync_service import SyncService
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
 
@@ -79,5 +83,48 @@ async def get_receipt_pdf(receipt_id: str, client: AHClient = Depends(get_client
         raise HTTPException(status_code=401, detail="Not authenticated. POST code to /receipts/auth first.")
     try:
         return await client.get_receipt_pdf(receipt_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/sync", response_model=SyncResultResponse)
+async def sync_receipts(
+    full_sync: bool = Query(False, description="If true, sync all receipts. Otherwise stop after finding 3 consecutive existing."),
+    client: AHClient = Depends(get_client),
+    db: Session = Depends(get_db),
+):
+    """
+    Sync receipts from AH API to local database.
+
+    Fetches receipts from the AH API and stores them in the local SQLite database.
+    By default, performs incremental sync (stops after finding 3 consecutive existing receipts).
+    Use full_sync=true to sync all receipts.
+    """
+    if not client.is_authenticated():
+        raise HTTPException(status_code=401, detail="Not authenticated. POST code to /receipts/auth first.")
+
+    try:
+        sync_service = SyncService(client=client, db=db)
+        result = await sync_service.sync_receipts(full_sync=full_sync)
+
+        # Determine status
+        if result.error_count == 0:
+            status = "success"
+        elif result.synced_count > 0:
+            status = "partial"
+        else:
+            status = "error"
+
+        return SyncResultResponse(
+            status=status,
+            synced_count=result.synced_count,
+            skipped_count=result.skipped_count,
+            error_count=result.error_count,
+            total_in_db=sync_service.get_total_receipts_count(),
+            synced_receipts=[
+                SyncedReceiptSummary(**r) for r in result.synced_receipts
+            ],
+            errors=[SyncError(**e) for e in result.errors],
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
