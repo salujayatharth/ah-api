@@ -51,6 +51,9 @@ class ShoppingListItem(BaseModel):
     confidence: float
     last_purchase_date: datetime
     purchase_count: int
+    # Additional fields for decay rate sensitivity visualization
+    median_interval_days: Optional[float] = None
+    weighted_avg_interval_days: Optional[float] = None
 
 
 class ShoppingListRecommendation(BaseModel):

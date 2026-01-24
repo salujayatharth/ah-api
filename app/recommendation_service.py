@@ -351,6 +351,9 @@ def generate_shopping_list(
             confidence=pattern.confidence,
             last_purchase_date=pattern.last_purchase_date,
             purchase_count=pattern.purchase_count,
+            # Include interval data for decay rate sensitivity visualization
+            median_interval_days=round(pattern.median_interval_days, 1),
+            weighted_avg_interval_days=round(pattern.weighted_avg_interval_days, 1),
         )
 
         if urgency == UrgencyLevel.NEEDED:

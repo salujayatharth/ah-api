@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Albert Heijn Smart Shopping List</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -702,6 +703,219 @@
             display: flex;
             align-items: center;
         }
+
+        /* Decay Curve Visualization */
+        .decay-curve-container {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .decay-curve-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .decay-curve-header h3 {
+            font-size: 0.9rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .decay-curve-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+        }
+
+        .decay-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .decay-stat-label {
+            color: #666;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .decay-stat-value {
+            font-weight: 600;
+            color: #00a0e2;
+        }
+
+        .decay-curve-chart {
+            height: 150px;
+            margin-bottom: 8px;
+        }
+
+        .decay-curve-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .decay-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .decay-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .decay-legend-dot.current {
+            background: #00a0e2;
+        }
+
+        .decay-legend-dot.conservative {
+            background: #28a745;
+            opacity: 0.5;
+        }
+
+        .decay-legend-dot.aggressive {
+            background: #dc3545;
+            opacity: 0.5;
+        }
+
+        /* Purchase Timeline Visualization */
+        .purchase-timeline {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .purchase-timeline h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .timeline-container {
+            position: relative;
+            height: 80px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e5e5e5;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .timeline-axis {
+            position: absolute;
+            bottom: 20px;
+            left: 12px;
+            right: 12px;
+            height: 2px;
+            background: #e5e5e5;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00a0e2;
+            transform: translate(-50%, -50%);
+            bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .timeline-dot:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 10;
+        }
+
+        .timeline-dot-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background: #333;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 20;
+        }
+
+        .timeline-dot:hover .timeline-dot-tooltip {
+            display: block;
+        }
+
+        .timeline-labels {
+            position: absolute;
+            bottom: 4px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .timeline-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .timeline-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timeline-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Sensitivity Badge */
+        .sensitivity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .sensitivity-badge.high {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -815,6 +1029,40 @@
                 <button class="btn btn-primary" onclick="loadShoppingList()">Update Recommendations</button>
                 <button class="btn btn-secondary" onclick="resetDefaults()">Reset Defaults</button>
             </div>
+
+            <!-- Decay Curve Visualization -->
+            <div class="decay-curve-container">
+                <div class="decay-curve-header">
+                    <h3>Decay Rate Impact</h3>
+                    <div class="decay-curve-stats">
+                        <div class="decay-stat">
+                            <span class="decay-stat-label">Half-life</span>
+                            <span class="decay-stat-value" id="decay-halflife">35 days</span>
+                        </div>
+                        <div class="decay-stat">
+                            <span class="decay-stat-label">90-day weight</span>
+                            <span class="decay-stat-value" id="decay-90day">16%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="decay-curve-chart">
+                    <canvas id="decayCurveChart"></canvas>
+                </div>
+                <div class="decay-curve-legend">
+                    <div class="decay-legend-item">
+                        <span class="decay-legend-dot current"></span>
+                        <span>Current (<span id="legend-current-rate">0.02</span>)</span>
+                    </div>
+                    <div class="decay-legend-item">
+                        <span class="decay-legend-dot conservative"></span>
+                        <span>Conservative (0.01)</span>
+                    </div>
+                    <div class="decay-legend-item">
+                        <span class="decay-legend-dot aggressive"></span>
+                        <span>Aggressive (0.05)</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Confidence Filter (below config) -->
@@ -881,6 +1129,28 @@
                 </div>
                 <div class="stats-grid" id="modal-stats">
                 </div>
+                <!-- Purchase Timeline Visualization -->
+                <div class="purchase-timeline" id="purchase-timeline">
+                    <h3>Purchase Timeline (Weight by Recency)</h3>
+                    <div class="timeline-container" id="timeline-container">
+                        <div class="timeline-axis"></div>
+                        <div class="timeline-labels">
+                            <span id="timeline-oldest">-</span>
+                            <span id="timeline-newest">Today</span>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <div class="timeline-legend-item">
+                            <span class="timeline-legend-dot" style="background: #00a0e2; opacity: 1;"></span>
+                            <span>High weight (recent)</span>
+                        </div>
+                        <div class="timeline-legend-item">
+                            <span class="timeline-legend-dot" style="background: #00a0e2; opacity: 0.3;"></span>
+                            <span>Low weight (older)</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="purchase-history">
                     <h3>Purchase History</h3>
                     <table>
@@ -903,6 +1173,272 @@
     <script>
         // API Base
         const API_BASE = '/analytics/recommendations';
+
+        // Decay curve chart instance
+        let decayCurveChart = null;
+
+        // Calculate exponential decay weight
+        function calculateDecayWeight(daysAgo, decayRate) {
+            return Math.exp(-decayRate * daysAgo);
+        }
+
+        // Calculate half-life (days until weight = 0.5)
+        function calculateHalfLife(decayRate) {
+            return Math.log(2) / decayRate;
+        }
+
+        // Initialize decay curve chart
+        function initDecayCurveChart() {
+            const ctx = document.getElementById('decayCurveChart').getContext('2d');
+
+            decayCurveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Current',
+                            data: [],
+                            borderColor: '#00a0e2',
+                            backgroundColor: 'rgba(0, 160, 226, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                        },
+                        {
+                            label: 'Conservative (0.01)',
+                            data: [],
+                            borderColor: 'rgba(40, 167, 69, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                        },
+                        {
+                            label: 'Aggressive (0.05)',
+                            data: [],
+                            borderColor: 'rgba(220, 53, 69, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => `${items[0].label} days ago`,
+                                label: (item) => `${item.dataset.label}: ${(item.raw * 100).toFixed(0)}% weight`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Days Ago',
+                                font: { size: 10 }
+                            },
+                            ticks: {
+                                font: { size: 9 },
+                                maxTicksLimit: 7
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Weight',
+                                font: { size: 10 }
+                            },
+                            min: 0,
+                            max: 1,
+                            ticks: {
+                                font: { size: 9 },
+                                callback: (value) => `${(value * 100).toFixed(0)}%`
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            updateDecayCurveChart();
+        }
+
+        // Update decay curve chart with current decay rate
+        function updateDecayCurveChart() {
+            const decayRate = parseFloat(document.getElementById('decay-rate').value) || 0.02;
+            const maxDays = 180;
+            const labels = [];
+            const currentData = [];
+            const conservativeData = [];
+            const aggressiveData = [];
+
+            for (let day = 0; day <= maxDays; day += 5) {
+                labels.push(day);
+                currentData.push(calculateDecayWeight(day, decayRate));
+                conservativeData.push(calculateDecayWeight(day, 0.01));
+                aggressiveData.push(calculateDecayWeight(day, 0.05));
+            }
+
+            decayCurveChart.data.labels = labels;
+            decayCurveChart.data.datasets[0].data = currentData;
+            decayCurveChart.data.datasets[1].data = conservativeData;
+            decayCurveChart.data.datasets[2].data = aggressiveData;
+            decayCurveChart.update('none');
+
+            // Update stats
+            const halfLife = calculateHalfLife(decayRate);
+            const weight90Days = calculateDecayWeight(90, decayRate);
+
+            document.getElementById('decay-halflife').textContent = `${halfLife.toFixed(0)} days`;
+            document.getElementById('decay-90day').textContent = `${(weight90Days * 100).toFixed(0)}%`;
+            document.getElementById('legend-current-rate').textContent = decayRate.toFixed(3);
+        }
+
+        // Render purchase timeline with weighted dots
+        function renderPurchaseTimeline(purchaseHistory, decayRate) {
+            const container = document.getElementById('timeline-container');
+            const timelineAxis = container.querySelector('.timeline-axis');
+            const timelineLabels = container.querySelector('.timeline-labels');
+
+            // Clear existing dots
+            container.querySelectorAll('.timeline-dot').forEach(dot => dot.remove());
+
+            if (!purchaseHistory || purchaseHistory.length === 0) {
+                document.getElementById('timeline-oldest').textContent = '-';
+                return;
+            }
+
+            const today = new Date();
+            const purchases = purchaseHistory.map(p => {
+                const date = new Date(p.date);
+                const daysAgo = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+                const weight = calculateDecayWeight(daysAgo, decayRate);
+                return { ...p, date, daysAgo, weight };
+            }).sort((a, b) => a.daysAgo - b.daysAgo);
+
+            const maxDaysAgo = Math.max(...purchases.map(p => p.daysAgo));
+            const minDaysAgo = 0;
+
+            // Update labels
+            document.getElementById('timeline-oldest').textContent = `${maxDaysAgo}d ago`;
+
+            // Create dots for each purchase
+            purchases.forEach((purchase, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'timeline-dot';
+
+                // Calculate position (12px padding on each side)
+                const range = maxDaysAgo - minDaysAgo || 1;
+                const position = 12 + ((maxDaysAgo - purchase.daysAgo) / range) * (container.offsetWidth - 24);
+                dot.style.left = `${position}px`;
+
+                // Size based on quantity (min 8px, max 18px)
+                const baseSize = 8;
+                const sizeBonus = Math.min(purchase.quantity * 2, 10);
+                const size = baseSize + sizeBonus;
+                dot.style.width = `${size}px`;
+                dot.style.height = `${size}px`;
+
+                // Opacity based on decay weight
+                const opacity = 0.3 + (purchase.weight * 0.7);
+                dot.style.opacity = opacity;
+
+                // Tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'timeline-dot-tooltip';
+                tooltip.innerHTML = `
+                    <strong>${formatDate(purchase.date)}</strong><br>
+                    Qty: ${purchase.quantity} | Weight: ${(purchase.weight * 100).toFixed(0)}%
+                `;
+                dot.appendChild(tooltip);
+
+                container.appendChild(dot);
+            });
+        }
+
+        // Calculate sensitivity based on available item data
+        // Items with large difference between median and weighted average intervals
+        // are more sensitive to decay rate changes
+        function calculateItemSensitivity(item) {
+            if (!item.median_interval_days || !item.weighted_avg_interval_days) {
+                return { sensitive: false, highSensitivity: false, variance: 0 };
+            }
+
+            const median = item.median_interval_days;
+            const weighted = item.weighted_avg_interval_days;
+            const diff = Math.abs(median - weighted);
+            const relativeVariance = diff / Math.max(median, weighted);
+
+            return {
+                sensitive: relativeVariance > 0.15, // >15% difference = sensitive
+                highSensitivity: relativeVariance > 0.3, // >30% difference = high sensitivity
+                variance: relativeVariance
+            };
+        }
+
+        // Original function for use with purchase history (in modal)
+        function calculateSensitivity(purchaseHistory) {
+            if (!purchaseHistory || purchaseHistory.length < 3) return { sensitive: false, variance: 0 };
+
+            const today = new Date();
+            const intervals = [];
+
+            // Calculate intervals and their ages
+            for (let i = 1; i < purchaseHistory.length; i++) {
+                const date1 = new Date(purchaseHistory[i - 1].date);
+                const date2 = new Date(purchaseHistory[i].date);
+                const interval = Math.abs((date1 - date2) / (1000 * 60 * 60 * 24));
+                const avgDate = new Date((date1.getTime() + date2.getTime()) / 2);
+                const daysAgo = (today - avgDate) / (1000 * 60 * 60 * 24);
+                intervals.push({ interval, daysAgo });
+            }
+
+            // Calculate weighted average at different decay rates
+            const rates = [0.01, 0.02, 0.05];
+            const weightedAvgs = rates.map(rate => {
+                let totalWeight = 0;
+                let weightedSum = 0;
+                intervals.forEach(({ interval, daysAgo }) => {
+                    const weight = calculateDecayWeight(daysAgo, rate);
+                    totalWeight += weight;
+                    weightedSum += interval * weight;
+                });
+                return weightedSum / totalWeight;
+            });
+
+            // Calculate variance in predictions
+            const avgPrediction = weightedAvgs.reduce((a, b) => a + b, 0) / weightedAvgs.length;
+            const variance = Math.max(...weightedAvgs) - Math.min(...weightedAvgs);
+            const relativeVariance = variance / avgPrediction;
+
+            return {
+                sensitive: relativeVariance > 0.3, // >30% difference = sensitive
+                highSensitivity: relativeVariance > 0.5, // >50% difference = high sensitivity
+                variance: relativeVariance
+            };
+        }
 
         // Store all items from API response
         let allData = null;
@@ -1047,11 +1583,19 @@
             // Sort by confidence descending (highest first)
             const sortedItems = [...items].sort((a, b) => b.confidence - a.confidence);
 
-            container.innerHTML = sortedItems.map((item, index) => `
+            container.innerHTML = sortedItems.map((item, index) => {
+                const sensitivity = calculateItemSensitivity(item);
+                const sensitivityBadge = sensitivity.highSensitivity
+                    ? '<span class="sensitivity-badge high" title="Prediction varies significantly with decay rate">⚡ Decay Sensitive</span>'
+                    : sensitivity.sensitive
+                        ? '<span class="sensitivity-badge" title="Prediction varies with decay rate">⚡ Sensitive</span>'
+                        : '';
+
+                return `
                 <div class="shopping-item" onclick="toggleItemDetails(this)" data-product="${encodeURIComponent(item.product_name)}">
                     <div class="item-header">
                         <div class="item-info">
-                            <h4>${item.product_name} <span class="item-meta-badge qty">×${item.suggested_quantity}</span></h4>
+                            <h4>${item.product_name} <span class="item-meta-badge qty">×${item.suggested_quantity}</span> ${sensitivityBadge}</h4>
                         </div>
                         <div class="item-price">${formatCurrency(item.estimated_cost)}</div>
                     </div>
@@ -1085,7 +1629,8 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function toggleItemDetails(element) {
@@ -1149,7 +1694,7 @@
                     </div>
                 `;
 
-                // Purchase history
+                // Purchase history table
                 document.getElementById('modal-history').innerHTML = data.purchase_history.map(h => `
                     <tr>
                         <td>${formatDate(h.date)}</td>
@@ -1158,6 +1703,9 @@
                         <td>${h.unit_price ? formatCurrency(h.quantity * h.unit_price) : '-'}</td>
                     </tr>
                 `).join('');
+
+                // Render purchase timeline with decay weights
+                renderPurchaseTimeline(data.purchase_history, parseFloat(params.decay_rate));
 
             } catch (error) {
                 document.getElementById('modal-explanation').textContent = 'Failed to load product details';
@@ -1211,6 +1759,15 @@
                 applyConfidenceFilter();
             });
             updateConfidenceLabel(); // Initial update
+
+            // Decay rate input listener - update chart in real-time
+            const decayRateInput = document.getElementById('decay-rate');
+            decayRateInput.addEventListener('input', () => {
+                updateDecayCurveChart();
+            });
+
+            // Initialize decay curve chart
+            initDecayCurveChart();
         });
 
         // Initialize
