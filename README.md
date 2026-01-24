@@ -5,9 +5,12 @@ A FastAPI wrapper for accessing Albert Heijn digital receipts via their GraphQL 
 ## Features
 
 - **OAuth Authentication** - Secure token-based auth with auto-refresh
-- **Receipt List** - Paginated list of all your receipts
+- **Receipt Sync & Storage** - Sync receipts to local SQLite database
 - **Receipt Details** - Full product breakdown, discounts, VAT, payments
 - **PDF Export** - Get receipt PDF URLs
+- **Spending Analytics** - Analyze spending by time, store, product, and track savings
+- **Smart Recommendations** - AI-powered shopping list predictions based on purchase history
+- **Product Information** - Fetch and cache detailed product info from AH webshop (brand, category, images)
 
 ## Installation
 
@@ -64,14 +67,47 @@ curl http://localhost:8000/receipts/{receipt_id}/pdf
 
 ## API Reference
 
+### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/receipts/auth` | Exchange auth code for tokens |
 | `GET` | `/receipts/auth/status` | Check authentication status |
 | `DELETE` | `/receipts/auth` | Clear stored tokens |
+
+### Receipts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | `GET` | `/receipts` | List receipts (`?offset=0&limit=20`) |
 | `GET` | `/receipts/{id}` | Get receipt details |
 | `GET` | `/receipts/{id}/pdf` | Get receipt PDF URL |
+| `POST` | `/receipts/sync` | Sync receipts to local database |
+
+### Analytics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/analytics/summary` | Overall spending summary |
+| `GET` | `/analytics/over-time` | Spending trends over time |
+| `GET` | `/analytics/stores` | Spending by store |
+| `GET` | `/analytics/products` | Top products by spending/quantity |
+| `GET` | `/analytics/savings` | Discount and savings analysis |
+| `GET` | `/recommendations` | AI shopping list predictions |
+| `GET` | `/recommendations/product/{name}` | Detailed analysis for a product |
+
+### Products
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/products/{product_id}` | Get cached product details |
+| `POST` | `/products/batch` | Fetch multiple products in batch |
+
+### Dashboards
+| Endpoint | Description |
+|----------|-------------|
+| `/dashboard` | Main analytics dashboard |
+| `/recommendations-ui` | Smart shopping list interface |
+
+### System
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | `GET` | `/health` | Health check |
 
 Interactive API docs available at `/docs` when running.
@@ -105,6 +141,8 @@ Interactive API docs available at `/docs` when running.
 ## Tech Stack
 
 - **FastAPI** - Modern Python web framework
+- **SQLAlchemy** - Database ORM
+- **SQLite** - Local database for receipts and product cache
 - **httpx** - Async HTTP client
 - **Pydantic** - Data validation
 - **AH GraphQL API** - Albert Heijn's internal API

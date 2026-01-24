@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app.database import create_tables
 from app.routes import router as receipts_router
 from app.analytics_routes import router as analytics_router
+from app.product_routes import router as products_router
 
 
 @asynccontextmanager
@@ -34,6 +35,7 @@ app.add_middleware(
 
 app.include_router(receipts_router)
 app.include_router(analytics_router)
+app.include_router(products_router)
 
 # Mount static files
 static_dir = Path(__file__).parent / "static"

@@ -28,17 +28,23 @@ AH GraphQL API → AHClient → FastAPI Routes → SQLite DB → Analytics Servi
 - `app/client.py` - Singleton `AHClient` handling AH GraphQL API communication, token management, and auto-refresh
 - `app/routes.py` - Receipt endpoints (`/receipts/*`) including sync functionality
 - `app/analytics_routes.py` - Analytics endpoints (`/analytics/*`)
+- `app/product_routes.py` - Product endpoints (`/products/*`) for fetching product details
+- `app/product_client.py` - `ProductClient` for fetching product info from AH webshop API
+- `app/product_models.py` - Pydantic models for product data
 - `app/sync_service.py` - Syncs receipts from AH API to local SQLite database
 - `app/analytics_service.py` - Query functions for spending analytics (by time, store, product, savings)
 - `app/database.py` - SQLAlchemy setup with SQLite (`receipts.db`)
-- `app/db_models.py` - Database models: Receipt, ReceiptItem, ReceiptDiscount
+- `app/db_models.py` - Database models: Receipt, ReceiptItem, ReceiptDiscount, ReceiptVAT, ProductCache
 
 **API Structure:**
 - `/receipts/auth` - Token management
 - `/receipts` - List/get receipts from AH API
 - `/receipts/sync` - Sync receipts to local DB
 - `/analytics/*` - Spending analytics (summary, over-time, stores, products, savings)
+- `/recommendations` - AI-powered shopping list predictions
+- `/products/*` - Fetch product details from AH webshop (cached in ProductCache table)
 - `/dashboard` - Static HTML analytics dashboard
+- `/recommendations-ui` - Interactive shopping list dashboard with compact grid layout
 
 ## Technical Notes
 
@@ -46,3 +52,7 @@ AH GraphQL API → AHClient → FastAPI Routes → SQLite DB → Analytics Servi
 - Required User-Agent: `Appie/9.27.0`
 - GraphQL queries defined inline in `client.py`
 - Sync has incremental mode (stops after 3 consecutive existing receipts) and full mode
+- Product details fetched from AH webshop API (`https://www.ah.nl/gql`) with different auth/headers
+- Product cache uses 7-day TTL to avoid excessive API calls
+- Recommendations UI uses compact grid layout with expandable cards for detailed product analysis
+- Shopping list includes interactive info popovers explaining decay rate, confidence thresholds, etc.

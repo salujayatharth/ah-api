@@ -72,3 +72,22 @@ class ReceiptVAT(Base):
 
     # Relationship
     receipt = relationship("Receipt", back_populates="vat_entries")
+
+
+class ProductCache(Base):
+    """Cache for product details fetched from AH API."""
+    __tablename__ = "product_cache"
+
+    product_id = Column(Text, primary_key=True)  # AH product ID from receipts
+    webshop_id = Column(Text, index=True)  # AH webshop ID
+    title = Column(Text, nullable=False)
+    brand = Column(Text)
+    category = Column(Text)
+    subcategory = Column(Text)
+    price = Column(Float)
+    unit_size = Column(Text)
+    image_url = Column(Text)
+    description = Column(Text)
+    raw_json = Column(Text)  # Store full API response as JSON string
+    fetched_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime)  # Cache expiry time
