@@ -19,12 +19,20 @@ A FastAPI wrapper for accessing Albert Heijn digital receipts via their GraphQL 
 git clone https://github.com/yourusername/ah-api.git
 cd ah-api
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+```
+
+**Recommended (using pyproject.toml):**
+```bash
+# Simpler setup with pyproject.toml
+uv sync
+source .venv/bin/activate  # uv creates .venv automatically
 ```
 
 ## Usage
@@ -145,6 +153,7 @@ Interactive API docs available at `/docs` when running.
 - **SQLite** - Local database for receipts and product cache
 - **httpx** - Async HTTP client
 - **Pydantic** - Data validation
+- **uv** - Fast Python package installer and resolver
 - **AH GraphQL API** - Albert Heijn's internal API
 
 ## Notes

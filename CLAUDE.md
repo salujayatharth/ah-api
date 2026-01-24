@@ -5,9 +5,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Start
 
 ```bash
-source venv/bin/activate
+# Install dependencies with uv (creates venv automatically)
+uv sync
+source .venv/bin/activate
+
+# Run the server
 uvicorn app.main:app --reload --port 8000
 ```
+
+Alternative (if no pyproject.toml):
+```bash
+uv venv && source .venv/bin/activate && uv pip install -r requirements.txt
+```
+
+**Common uv commands:**
+- `uv sync` - Install/update all dependencies
+- `uv add <package>` - Add a new dependency
+- `uv remove <package>` - Remove a dependency
+- `uv pip install <package>` - Install package in current venv
+- `uv run <command>` - Run command in uv-managed environment
 
 API docs at http://localhost:8000/docs, dashboard at http://localhost:8000/dashboard
 
@@ -56,3 +72,4 @@ AH GraphQL API → AHClient → FastAPI Routes → SQLite DB → Analytics Servi
 - Product cache uses 7-day TTL to avoid excessive API calls
 - Recommendations UI uses compact grid layout with expandable cards for detailed product analysis
 - Shopping list includes interactive info popovers explaining decay rate, confidence thresholds, etc.
+- Uses `uv` for fast dependency management (replaces pip) with `pyproject.toml` for modern Python packaging
