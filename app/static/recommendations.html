@@ -774,28 +774,6 @@
                     <span class="hint">How far ahead to plan</span>
                 </div>
                 <div class="control-group">
-                    <label class="label-with-info">
-                        Min Confidence
-                        <span class="info-icon" tabindex="0">
-                            ?
-                            <div class="popover">
-                                <div class="popover-title">Confidence Threshold</div>
-                                <div>
-                                    Minimum prediction confidence (0-1) required to show an item. Higher values = only very predictable items.
-                                </div>
-                                <div class="popover-example">
-                                    <strong>Recommended:</strong><br>
-                                    • 0.3: Balanced - shows regular items<br>
-                                    • 0.5: Strict - only highly predictable items<br>
-                                    • 0.2: Lenient - includes occasional purchases
-                                </div>
-                            </div>
-                        </span>
-                    </label>
-                    <input type="range" id="min-confidence" value="0.5" min="0" max="1" step="0.05">
-                    <span class="hint" id="confidence-value">0.50 (50%)</span>
-                </div>
-                <div class="control-group">
                     <label>Min Purchases</label>
                     <input type="number" id="min-purchases" value="3" min="1" max="10">
                     <span class="hint">Minimum purchase count</span>
@@ -836,6 +814,33 @@
             <div class="controls-actions">
                 <button class="btn btn-primary" onclick="loadShoppingList()">Update Recommendations</button>
                 <button class="btn btn-secondary" onclick="resetDefaults()">Reset Defaults</button>
+            </div>
+        </div>
+
+        <!-- Confidence Filter (below config) -->
+        <div class="controls-panel">
+            <h2>Filter by Confidence</h2>
+            <div class="control-group">
+                <label class="label-with-info">
+                    Min Confidence
+                    <span class="info-icon" tabindex="0">
+                        ?
+                        <div class="popover">
+                            <div class="popover-title">Confidence Threshold</div>
+                            <div>
+                                Minimum prediction confidence (0-1) required to show an item. Higher values = only very predictable items.
+                            </div>
+                            <div class="popover-example">
+                                <strong>Recommended:</strong><br>
+                                • 0.3: Balanced - shows regular items<br>
+                                • 0.5: Strict - only highly predictable items<br>
+                                • 0.0: Show all - includes all predictions
+                            </div>
+                        </div>
+                    </span>
+                </label>
+                <input type="range" id="min-confidence" value="0.3" min="0" max="1" step="0.05">
+                <span class="hint" id="confidence-value">0.30 (30%)</span>
             </div>
         </div>
 
@@ -899,6 +904,9 @@
         // API Base
         const API_BASE = '/analytics/recommendations';
 
+        // Store all items from API response
+        let allData = null;
+
         // Utility functions
         function formatCurrency(amount) {
             return new Intl.NumberFormat('nl-NL', {
@@ -929,9 +937,9 @@
         }
 
         function getParams() {
+            // Don't send min_confidence to API - we'll filter client-side
             return {
                 days_ahead: document.getElementById('days-ahead').value,
-                min_confidence: document.getElementById('min-confidence').value,
                 min_purchases: document.getElementById('min-purchases').value,
                 max_avg_interval: document.getElementById('max-avg-interval').value,
                 max_days_since_last: document.getElementById('max-days-since').value,
@@ -941,7 +949,7 @@
 
         function resetDefaults() {
             document.getElementById('days-ahead').value = '4';
-            document.getElementById('min-confidence').value = '0.5';
+            document.getElementById('min-confidence').value = '0.3';
             document.getElementById('min-purchases').value = '3';
             document.getElementById('max-avg-interval').value = '60';
             document.getElementById('max-days-since').value = '90';
@@ -955,6 +963,40 @@
             const label = document.getElementById('confidence-value');
             const value = parseFloat(slider.value);
             label.textContent = `${value.toFixed(2)} (${(value * 100).toFixed(0)}%)`;
+        }
+
+        function getMinConfidence() {
+            return parseFloat(document.getElementById('min-confidence').value);
+        }
+
+        function filterItemsByConfidence(items, minConfidence) {
+            return items.filter(item => item.confidence >= minConfidence);
+        }
+
+        function applyConfidenceFilter() {
+            if (!allData) return;
+
+            const minConfidence = getMinConfidence();
+
+            // Filter items by confidence
+            const filteredNeeded = filterItemsByConfidence(allData.needed_items, minConfidence);
+            const filteredSoon = filterItemsByConfidence(allData.might_need_soon, minConfidence);
+
+            // Update summary cards
+            document.getElementById('needed-count').textContent = filteredNeeded.length;
+            document.getElementById('soon-count').textContent = filteredSoon.length;
+
+            // Calculate estimated total for filtered items
+            const estimatedTotal = filteredNeeded.reduce((sum, item) => sum + item.estimated_cost, 0);
+            document.getElementById('estimated-total').textContent = formatCurrency(estimatedTotal);
+
+            // Update badges
+            document.getElementById('needed-badge').textContent = filteredNeeded.length;
+            document.getElementById('soon-badge').textContent = filteredSoon.length;
+
+            // Render filtered lists
+            renderShoppingList('needed-list', filteredNeeded, 'needed');
+            renderShoppingList('soon-list', filteredSoon, 'soon');
         }
 
         // Fetch helpers
@@ -978,22 +1020,15 @@
                 const queryString = new URLSearchParams(params).toString();
                 const data = await fetchData(`${API_BASE}/shopping-list?${queryString}`);
 
-                // Update summary cards
-                document.getElementById('needed-count').textContent = data.needed_items.length;
-                document.getElementById('soon-count').textContent = data.might_need_soon.length;
-                document.getElementById('estimated-total').textContent = formatCurrency(data.estimated_total);
+                // Store all data for client-side filtering
+                allData = data;
+
+                // Update products analyzed (doesn't change with confidence filter)
                 document.getElementById('products-analyzed').textContent = data.items_analyzed;
                 document.getElementById('filtered-out').textContent = `${data.items_filtered_out} filtered out`;
 
-                // Update badges
-                document.getElementById('needed-badge').textContent = data.needed_items.length;
-                document.getElementById('soon-badge').textContent = data.might_need_soon.length;
-
-                // Render needed items
-                renderShoppingList('needed-list', data.needed_items, 'needed');
-
-                // Render might need soon items
-                renderShoppingList('soon-list', data.might_need_soon, 'soon');
+                // Apply confidence filter to display
+                applyConfidenceFilter();
 
             } catch (error) {
                 showError('Failed to load shopping list recommendations');
@@ -1168,9 +1203,12 @@
                 document.querySelectorAll('.info-icon').forEach(i => i.classList.remove('active'));
             });
 
-            // Confidence slider listener
+            // Confidence slider listener - update label and filter in real-time
             const confidenceSlider = document.getElementById('min-confidence');
-            confidenceSlider.addEventListener('input', updateConfidenceLabel);
+            confidenceSlider.addEventListener('input', () => {
+                updateConfidenceLabel();
+                applyConfidenceFilter();
+            });
             updateConfidenceLabel(); // Initial update
         });
 

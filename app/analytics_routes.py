@@ -115,7 +115,7 @@ def get_receipt_detail(receipt_id: str, db: Session = Depends(get_db)):
 @router.get("/recommendations/shopping-list", response_model=ShoppingListRecommendation)
 def get_shopping_list(
     days_ahead: int = Query(4, ge=1, le=30, description="Planning horizon in days (default 4 for 2x/week shopping)"),
-    min_confidence: float = Query(0.3, ge=0, le=1, description="Minimum confidence threshold"),
+    min_confidence: Optional[float] = Query(None, ge=0, le=1, description="Optional minimum confidence threshold for filtering"),
     decay_rate: float = Query(0.02, ge=0.001, le=0.1, description="Exponential decay rate for weighting recent purchases"),
     min_purchases: int = Query(3, ge=1, le=10, description="Minimum purchases required to include product"),
     max_avg_interval: float = Query(60, ge=7, le=180, description="Max average interval to consider product regular"),
@@ -136,7 +136,7 @@ def get_shopping_list(
 
     **Parameters:**
     - **days_ahead**: Planning horizon (4 days = shop 2x/week)
-    - **min_confidence**: Filter out low-confidence predictions
+    - **min_confidence**: Optional filter for low-confidence predictions (if not provided, returns all items)
     - **decay_rate**: λ in e^(-λ×days), 0.02 gives ~35-day half-life
     - **min_purchases**: Minimum purchase count to include product (filters one-offs)
     - **max_avg_interval**: Max average days between purchases (filters rare items)

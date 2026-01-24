@@ -298,7 +298,7 @@ def get_consumption_patterns(
 def generate_shopping_list(
     db: Session,
     days_ahead: int = 4,
-    min_confidence: float = 0.3,
+    min_confidence: Optional[float] = None,
     decay_rate: float = 0.02,
     min_purchases: int = 3,
     max_avg_interval: float = 60,
@@ -306,6 +306,8 @@ def generate_shopping_list(
 ) -> ShoppingListRecommendation:
     """
     Generate shopping list recommendation for items needed within planning horizon.
+
+    If min_confidence is None, returns all items regardless of confidence level.
     """
     now = datetime.now(timezone.utc)
 
@@ -322,8 +324,8 @@ def generate_shopping_list(
     might_need_soon: list[ShoppingListItem] = []
 
     for pattern in patterns_response.products:
-        # Skip low confidence predictions
-        if pattern.confidence < min_confidence:
+        # Skip low confidence predictions only if min_confidence is specified
+        if min_confidence is not None and pattern.confidence < min_confidence:
             continue
 
         # Calculate suggested quantity (round up to nearest integer, using median)
