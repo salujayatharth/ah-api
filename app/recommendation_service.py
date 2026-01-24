@@ -345,6 +345,7 @@ def generate_shopping_list(
             suggested_quantity=suggested_qty,
             urgency=urgency,
             estimated_days_until_needed=round(pattern.days_until_needed, 1),
+            estimated_inventory=round(pattern.estimated_inventory, 1),
             median_price=round(pattern.median_price, 2),
             estimated_cost=round(pattern.median_price * suggested_qty, 2),
             confidence=pattern.confidence,

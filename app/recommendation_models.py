@@ -45,6 +45,7 @@ class ShoppingListItem(BaseModel):
     suggested_quantity: int
     urgency: UrgencyLevel
     estimated_days_until_needed: float
+    estimated_inventory: float
     median_price: float
     estimated_cost: float
     confidence: float

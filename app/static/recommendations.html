@@ -1044,21 +1044,22 @@
                 return;
             }
 
-            container.innerHTML = items.map((item, index) => `
+            // Sort by confidence descending (highest first)
+            const sortedItems = [...items].sort((a, b) => b.confidence - a.confidence);
+
+            container.innerHTML = sortedItems.map((item, index) => `
                 <div class="shopping-item" onclick="toggleItemDetails(this)" data-product="${encodeURIComponent(item.product_name)}">
                     <div class="item-header">
                         <div class="item-info">
-                            <h4>${item.product_name}</h4>
+                            <h4>${item.product_name} <span class="item-meta-badge qty">×${item.suggested_quantity}</span></h4>
                         </div>
                         <div class="item-price">${formatCurrency(item.estimated_cost)}</div>
                     </div>
                     <div class="item-meta">
-                        <span class="item-meta-badge qty">×${item.suggested_quantity}</span>
                         <span class="item-meta-badge">~${formatNumber(item.estimated_days_until_needed, 0)}d</span>
                         <span class="item-meta-badge">${item.purchase_count} purchases</span>
-                        <span class="item-urgency urgency-${item.urgency}">
-                            ${item.urgency === 'needed' ? 'Needed' : item.urgency === 'soon' ? 'Soon' : 'Later'}
-                        </span>
+                        <span class="item-meta-badge">~${formatNumber(item.estimated_inventory, 1)} remaining</span>
+                        <span class="item-meta-badge">${(item.confidence * 100).toFixed(0)}% confidence</span>
                     </div>
                     <div class="item-details">
                         <div class="detail-grid">
