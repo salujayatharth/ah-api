@@ -375,78 +375,6 @@
             font-weight: 500;
         }
 
-        /* Consumption Patterns Table */
-        .table-card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 24px;
-            overflow-x: auto;
-        }
-
-        .table-card h2 {
-            font-size: 1.1rem;
-            margin-bottom: 16px;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #f9f9f9;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-
-        tr.clickable {
-            cursor: pointer;
-        }
-
-        .amount {
-            font-weight: 500;
-            color: #00a0e2;
-        }
-
-        .confidence-bar {
-            width: 60px;
-            height: 8px;
-            background: #e9e9e9;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .confidence-fill {
-            height: 100%;
-            border-radius: 4px;
-        }
-
-        .confidence-high {
-            background: #28a745;
-        }
-
-        .confidence-medium {
-            background: #ffc107;
-        }
-
-        .confidence-low {
-            background: #dc3545;
-        }
 
         /* Product Detail Modal */
         .modal-overlay {
@@ -552,34 +480,6 @@
             font-size: 0.9rem;
         }
 
-        /* Search box */
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-        }
-
-        .search-box button {
-            padding: 10px 20px;
-            background: #00a0e2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .search-box button:hover {
-            background: #0077b3;
-        }
 
         /* Loading state */
         .loading {
@@ -626,96 +526,6 @@
             margin-bottom: 10px;
         }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 0;
-            margin-bottom: 24px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px 24px;
-            border: none;
-            background: white;
-            cursor: pointer;
-            font-size: 1rem;
-            color: #666;
-            transition: all 0.2s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab:hover {
-            background: #f9f9f9;
-        }
-
-        .tab.active {
-            color: #00a0e2;
-            border-bottom-color: #00a0e2;
-            font-weight: 500;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Sortable headers */
-        th.sortable {
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-            padding-right: 24px;
-        }
-
-        th.sortable:hover {
-            background-color: #f0f0f0;
-        }
-
-        th.sortable::after {
-            content: '';
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: 5px solid transparent;
-            border-top-color: #ccc;
-            margin-top: 3px;
-        }
-
-        th.sortable::before {
-            content: '';
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: 5px solid transparent;
-            border-bottom-color: #ccc;
-            margin-top: -9px;
-        }
-
-        th.sortable.asc::after {
-            border-top-color: transparent;
-        }
-
-        th.sortable.asc::before {
-            border-bottom-color: #00a0e2;
-        }
-
-        th.sortable.desc::after {
-            border-top-color: #00a0e2;
-        }
-
-        th.sortable.desc::before {
-            border-bottom-color: transparent;
-        }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -986,61 +796,26 @@
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="shopping-list">Shopping List</button>
-            <button class="tab" data-tab="consumption-patterns">Consumption Patterns</button>
-        </div>
-
-        <!-- Shopping List Tab -->
-        <div id="shopping-list-tab" class="tab-content active">
-            <!-- Needed Items -->
-            <div class="shopping-section" id="needed-section">
-                <h2>
-                    Items You Need
-                    <span class="badge badge-needed" id="needed-badge">0</span>
-                </h2>
-                <div class="shopping-list" id="needed-list">
-                    <div class="loading">Loading recommendations...</div>
-                </div>
-            </div>
-
-            <!-- Might Need Soon -->
-            <div class="shopping-section" id="soon-section">
-                <h2>
-                    Might Need Soon
-                    <span class="badge badge-soon" id="soon-badge">0</span>
-                </h2>
-                <div class="shopping-list" id="soon-list">
-                    <div class="loading">Loading recommendations...</div>
-                </div>
+        <!-- Shopping List -->
+        <!-- Needed Items -->
+        <div class="shopping-section" id="needed-section">
+            <h2>
+                Items You Need
+                <span class="badge badge-needed" id="needed-badge">0</span>
+            </h2>
+            <div class="shopping-list" id="needed-list">
+                <div class="loading">Loading recommendations...</div>
             </div>
         </div>
 
-        <!-- Consumption Patterns Tab -->
-        <div id="consumption-patterns-tab" class="tab-content">
-            <div class="table-card">
-                <h2>Product Consumption Patterns</h2>
-                <div class="search-box">
-                    <input type="text" id="pattern-search" placeholder="Search products...">
-                    <button onclick="filterPatterns()">Search</button>
-                </div>
-                <table id="patterns-table">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-sort="product_name">Product</th>
-                            <th class="sortable" data-sort="purchase_count">Purchases</th>
-                            <th class="sortable" data-sort="median_interval_days">Median Interval</th>
-                            <th class="sortable" data-sort="consumption_rate_per_day">Consumption/Day</th>
-                            <th class="sortable desc" data-sort="days_until_needed">Days Until Needed</th>
-                            <th class="sortable" data-sort="estimated_inventory">Est. Inventory</th>
-                            <th class="sortable" data-sort="confidence">Confidence</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patterns-tbody">
-                        <tr><td colspan="7" class="loading">Loading patterns...</td></tr>
-                    </tbody>
-                </table>
+        <!-- Might Need Soon -->
+        <div class="shopping-section" id="soon-section">
+            <h2>
+                Might Need Soon
+                <span class="badge badge-soon" id="soon-badge">0</span>
+            </h2>
+            <div class="shopping-list" id="soon-list">
+                <div class="loading">Loading recommendations...</div>
             </div>
         </div>
     </div>
@@ -1078,11 +853,6 @@
     </div>
 
     <script>
-        // State
-        let consumptionPatterns = [];
-        let patternSort = { by: 'days_until_needed', order: 'asc' };
-        let patternSearchTerm = '';
-
         // API Base
         const API_BASE = '/analytics/recommendations';
 
@@ -1134,7 +904,6 @@
             document.getElementById('max-days-since').value = '90';
             document.getElementById('decay-rate').value = '0.02';
             loadShoppingList();
-            loadConsumptionPatterns();
         }
 
         // Fetch helpers
@@ -1236,83 +1005,6 @@
             element.classList.toggle('expanded');
         }
 
-        // Load Consumption Patterns
-        async function loadConsumptionPatterns() {
-            try {
-                const params = getParams();
-                const queryString = new URLSearchParams({
-                    decay_rate: params.decay_rate,
-                    min_purchases: params.min_purchases,
-                    max_avg_interval: params.max_avg_interval,
-                    max_days_since_last: params.max_days_since_last,
-                }).toString();
-
-                const data = await fetchData(`${API_BASE}/consumption-patterns?${queryString}`);
-                consumptionPatterns = data.products;
-                renderPatternsTable();
-            } catch (error) {
-                document.getElementById('patterns-tbody').innerHTML =
-                    '<tr><td colspan="7" class="error">Failed to load consumption patterns</td></tr>';
-                console.error(error);
-            }
-        }
-
-        function filterPatterns() {
-            patternSearchTerm = document.getElementById('pattern-search').value.toLowerCase();
-            renderPatternsTable();
-        }
-
-        function renderPatternsTable() {
-            const tbody = document.getElementById('patterns-tbody');
-
-            let filtered = consumptionPatterns;
-            if (patternSearchTerm) {
-                filtered = filtered.filter(p =>
-                    p.product_name.toLowerCase().includes(patternSearchTerm)
-                );
-            }
-
-            // Sort
-            filtered.sort((a, b) => {
-                let aVal = a[patternSort.by];
-                let bVal = b[patternSort.by];
-                if (typeof aVal === 'string') {
-                    aVal = aVal.toLowerCase();
-                    bVal = bVal.toLowerCase();
-                }
-                if (patternSort.order === 'asc') {
-                    return aVal > bVal ? 1 : -1;
-                } else {
-                    return aVal < bVal ? 1 : -1;
-                }
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No patterns found</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = filtered.map(p => {
-                const confidenceClass = p.confidence >= 0.6 ? 'high' : p.confidence >= 0.4 ? 'medium' : 'low';
-                return `
-                    <tr class="clickable" onclick="showProductDetail('${encodeURIComponent(p.product_name)}')">
-                        <td>${p.product_name}</td>
-                        <td>${p.purchase_count}</td>
-                        <td>${formatNumber(p.median_interval_days)} days</td>
-                        <td>${formatNumber(p.consumption_rate_per_day, 3)}</td>
-                        <td class="amount">${formatNumber(p.days_until_needed, 0)} days</td>
-                        <td>${formatNumber(p.estimated_inventory, 1)}</td>
-                        <td>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill confidence-${confidenceClass}" style="width: ${p.confidence * 100}%"></div>
-                            </div>
-                            <span style="font-size: 0.8rem; color: #666;">${(p.confidence * 100).toFixed(0)}%</span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
         // Product Detail Modal
         async function showProductDetail(encodedProductName) {
             const productName = decodeURIComponent(encodedProductName);
@@ -1404,47 +1096,6 @@
             }
         });
 
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-            });
-        });
-
-        // Sort handling for patterns table
-        document.querySelectorAll('#patterns-table th.sortable').forEach(th => {
-            th.addEventListener('click', () => {
-                const column = th.dataset.sort;
-                if (patternSort.by === column) {
-                    patternSort.order = patternSort.order === 'asc' ? 'desc' : 'asc';
-                } else {
-                    patternSort.by = column;
-                    patternSort.order = 'asc';
-                }
-
-                // Update header classes
-                document.querySelectorAll('#patterns-table th.sortable').forEach(h => {
-                    h.classList.remove('asc', 'desc');
-                    if (h.dataset.sort === patternSort.by) {
-                        h.classList.add(patternSort.order);
-                    }
-                });
-
-                renderPatternsTable();
-            });
-        });
-
-        // Pattern search on enter
-        document.getElementById('pattern-search').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                filterPatterns();
-            }
-        });
-
         // Info icon click handling for mobile
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.info-icon').forEach(icon => {
@@ -1470,10 +1121,7 @@
         // Initialize
         async function init() {
             clearError();
-            await Promise.all([
-                loadShoppingList(),
-                loadConsumptionPatterns(),
-            ]);
+            await loadShoppingList();
         }
 
         init();

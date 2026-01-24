@@ -16,7 +16,6 @@ from app.analytics_models import (
 )
 from app.recommendation_models import (
     ShoppingListRecommendation,
-    ConsumptionPatternsResponse,
     ProductConsumptionDetail,
 )
 from app import analytics_service
@@ -147,35 +146,6 @@ def get_shopping_list(
         db,
         days_ahead=days_ahead,
         min_confidence=min_confidence,
-        decay_rate=decay_rate,
-        min_purchases=min_purchases,
-        max_avg_interval=max_avg_interval,
-        max_days_since_last=max_days_since_last,
-    )
-
-
-@router.get("/recommendations/consumption-patterns", response_model=ConsumptionPatternsResponse)
-def get_consumption_patterns(
-    decay_rate: float = Query(0.02, ge=0.001, le=0.1, description="Exponential decay rate"),
-    min_purchases: int = Query(3, ge=1, le=10, description="Minimum purchases required"),
-    max_avg_interval: float = Query(60, ge=7, le=180, description="Max average interval days"),
-    max_days_since_last: float = Query(90, ge=14, le=365, description="Max days since last purchase"),
-    db: Session = Depends(get_db),
-):
-    """
-    Get consumption pattern analysis for all products.
-
-    Returns detailed metrics for each product including:
-    - Purchase frequency and intervals
-    - Consumption rate (units per day)
-    - Estimated current inventory
-    - Days until restocking needed
-    - Confidence score
-
-    Useful for debugging recommendations and understanding buying patterns.
-    """
-    return recommendation_service.get_consumption_patterns(
-        db,
         decay_rate=decay_rate,
         min_purchases=min_purchases,
         max_avg_interval=max_avg_interval,
