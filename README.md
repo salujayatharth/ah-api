@@ -39,9 +39,17 @@ source .venv/bin/activate  # uv creates .venv automatically
 
 ### 1. Start the server
 
+**Quick start with script:**
+```bash
+./scripts/dev-server.sh
+```
+
+**Or manually:**
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
+
+The `dev-server.sh` script automatically finds an available port and starts the server.
 
 ### 2. Authenticate
 
@@ -155,6 +163,10 @@ Interactive API docs available at `/docs` when running.
 - **Pydantic** - Data validation
 - **uv** - Fast Python package installer and resolver
 - **AH GraphQL API** - Albert Heijn's internal API
+
+## Development
+
+See `scripts/README.md` for development scripts and Vibe Kanban integration instructions.
 
 ## Notes
 
