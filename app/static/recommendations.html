@@ -522,6 +522,38 @@
 
         .purchase-history table {
             font-size: 0.9rem;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .purchase-history table thead {
+            background: #f5f5f5;
+        }
+
+        .purchase-history table th {
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .purchase-history table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .purchase-history table td.na {
+            color: #999;
+            font-style: italic;
+        }
+
+        .purchase-history table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .purchase-history table tbody tr:last-child td {
+            border-bottom: none;
         }
 
 
@@ -1153,6 +1185,9 @@
 
                 <div class="purchase-history">
                     <h3>Purchase History</h3>
+                    <div class="explanation-box" style="font-size: 0.85rem; padding: 10px; margin-bottom: 12px;">
+                        <strong>Note:</strong> Some purchases may not show individual pricing due to bundle pricing, discounts, or limited data from Albert Heijn's system. The prediction algorithm uses median prices from available data.
+                    </div>
                     <table>
                         <thead>
                             <tr>
@@ -1699,8 +1734,8 @@
                     <tr>
                         <td>${formatDate(h.date)}</td>
                         <td>${h.quantity}</td>
-                        <td>${h.unit_price ? formatCurrency(h.unit_price) : '-'}</td>
-                        <td>${h.unit_price ? formatCurrency(h.quantity * h.unit_price) : '-'}</td>
+                        <td class="${h.unit_price ? '' : 'na'}">${h.unit_price ? formatCurrency(h.unit_price) : 'N/A'}</td>
+                        <td class="${h.unit_price ? '' : 'na'}">${h.unit_price ? formatCurrency(h.quantity * h.unit_price) : 'N/A'}</td>
                     </tr>
                 `).join('');
 
