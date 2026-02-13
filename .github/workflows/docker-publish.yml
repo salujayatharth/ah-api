@@ -42,15 +42,14 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             # Always tag as latest for tagged releases
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Include git SHA
-            type=sha,prefix={{branch}}-
+            type=raw,value=latest
           labels: |
             org.opencontainers.image.title=AH API
             org.opencontainers.image.description=Albert Heijn Receipt and Analytics API
             org.opencontainers.image.vendor=${{ github.repository_owner }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
