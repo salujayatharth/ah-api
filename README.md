@@ -34,8 +34,6 @@ Or use Docker Compose:
 docker compose up -d
 ```
 
-See [DOCKER.md](DOCKER.md) for detailed Docker setup and deployment instructions.
-
 ### Option 2: Local Development
 
 ```bash
@@ -185,7 +183,7 @@ docker build -t ah-api:local .
 docker run -p 8000:8000 -v ah-data:/data ah-api:local
 ```
 
-Images are automatically built and pushed to GitHub Container Registry on tagged releases. See [DOCKER.md](DOCKER.md) for CI/CD details.
+Images are automatically built and pushed to GitHub Container Registry on tagged releases.
 
 ## Notes
 
