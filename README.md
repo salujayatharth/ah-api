@@ -14,6 +14,30 @@ A FastAPI wrapper for accessing Albert Heijn digital receipts via their GraphQL 
 
 ## Installation
 
+### Option 1: Docker (Recommended for production)
+
+```bash
+# Using pre-built image from GitHub Container Registry
+docker pull ghcr.io/yatharth/ah-api:latest
+
+# Run with volume for data persistence
+docker run -d \
+  --name ah-api \
+  -p 8000:8000 \
+  -v ah-data:/data \
+  ghcr.io/yatharth/ah-api:latest
+```
+
+Or use Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker setup and deployment instructions.
+
+### Option 2: Local Development
+
 ```bash
 # Clone the repo
 git clone https://github.com/yourusername/ah-api.git
@@ -23,14 +47,6 @@ cd ah-api
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Create virtual environment and install dependencies
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install -r requirements.txt
-```
-
-**Recommended (using pyproject.toml):**
-```bash
-# Simpler setup with pyproject.toml
 uv sync
 source .venv/bin/activate  # uv creates .venv automatically
 ```
@@ -39,17 +55,9 @@ source .venv/bin/activate  # uv creates .venv automatically
 
 ### 1. Start the server
 
-**Quick start with script:**
-```bash
-./scripts/dev-server.sh
-```
-
-**Or manually:**
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
-
-The `dev-server.sh` script automatically finds an available port and starts the server.
 
 ### 2. Authenticate
 
@@ -162,11 +170,22 @@ Interactive API docs available at `/docs` when running.
 - **httpx** - Async HTTP client
 - **Pydantic** - Data validation
 - **uv** - Fast Python package installer and resolver
+- **Docker** - Containerization with multi-arch support (amd64/arm64)
 - **AH GraphQL API** - Albert Heijn's internal API
 
 ## Development
 
-See `scripts/README.md` for development scripts and Vibe Kanban integration instructions.
+### Building Docker Images Locally
+
+```bash
+# Build image
+docker build -t ah-api:local .
+
+# Test locally
+docker run -p 8000:8000 -v ah-data:/data ah-api:local
+```
+
+Images are automatically built and pushed to GitHub Container Registry on tagged releases. See [DOCKER.md](DOCKER.md) for CI/CD details.
 
 ## Notes
 

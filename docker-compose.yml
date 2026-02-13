@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  ah-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ah-api:local
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount data directory for database and tokens
+      - ah-data:/data
+      # Alternative: bind mount to host directory
+      # - ./data:/data
+    environment:
+      # Optional: Override data directory location
+      - DATA_DIR=/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  ah-data:
+    driver: local
+    # Optional: specify driver options for custom location
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /path/on/host

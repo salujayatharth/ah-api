@@ -1,0 +1,54 @@
+# Python
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment and secrets
+.env
+.env.*
+.tokens.json
+
+# Database files (should be in volumes)
+receipts.db
+receipts_runpod.db
+*.db
+*.db-shm
+*.db-wal
+
+# Development
+scripts/
+tests/
+.pytest_cache
+.coverage
+htmlcov/
+
+# Documentation
+*.md
+README.md
+CLAUDE.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD (deployment configs are separate)
+.github/
+fly.toml

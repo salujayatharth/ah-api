@@ -9,10 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 uv sync
 source .venv/bin/activate
 
-# Run the server (automatic port selection)
-./scripts/dev-server.sh
-
-# Or manually with fixed port
+# Run the server
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -76,9 +73,4 @@ AH GraphQL API → AHClient → FastAPI Routes → SQLite DB → Analytics Servi
 - Recommendations UI uses compact grid layout with expandable cards for detailed product analysis
 - Shopping list includes interactive info popovers explaining decay rate, confidence thresholds, etc.
 - Uses `uv` for fast dependency management (replaces pip) with `pyproject.toml` for modern Python packaging
-
-## Development Scripts
-
-Development helper scripts are available in `scripts/`:
-- `scripts/dev-server.sh` - Starts FastAPI dev server on any available port
-- `scripts/README.md` - Setup instructions for Vibe Kanban integration
+- Docker support with multi-arch images published to GitHub Container Registry on tagged releases

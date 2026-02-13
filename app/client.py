@@ -1,11 +1,13 @@
 import httpx
 import json
+import os
 import time
 from pathlib import Path
 from typing import Optional
 from app.config import Settings
 
-TOKEN_FILE = Path(__file__).parent.parent / ".tokens.json"
+DATA_DIR = os.environ.get("DATA_DIR", str(Path(__file__).parent.parent))
+TOKEN_FILE = Path(DATA_DIR) / ".tokens.json"
 
 
 class AHClient:
