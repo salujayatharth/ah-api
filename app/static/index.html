@@ -286,6 +286,62 @@
             color: white;
         }
 
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .auth-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .auth-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            min-width: 0;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #00a0e2;
+            box-shadow: 0 0 0 2px rgba(0, 160, 226, 0.2);
+        }
+
+        .auth-actions {
+            margin-top: 8px;
+        }
+
+        .auth-actions a {
+            font-size: 0.8rem;
+            color: #00a0e2;
+            text-decoration: none;
+        }
+
+        .auth-actions a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -421,11 +477,24 @@
         <div class="status-section">
             <h3>System Status</h3>
             <div class="status-grid">
-                <div class="status-item">
-                    <div class="status-indicator loading" id="auth-indicator"></div>
-                    <div class="info">
-                        <div class="title">Authentication</div>
-                        <div class="detail" id="auth-status">Checking...</div>
+                <div class="status-item" style="flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="status-indicator loading" id="auth-indicator"></div>
+                        <div class="info">
+                            <div class="title">Authentication</div>
+                            <div class="detail" id="auth-status">Checking...</div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" id="logout-btn" onclick="logout()" style="display: none;">Logout</button>
+                    </div>
+                    <div id="auth-form-container" style="display: none;">
+                        <div class="auth-form">
+                            <input type="text" id="auth-code-input" placeholder="Paste authorization code here">
+                            <button class="btn btn-primary btn-sm" id="auth-submit-btn" onclick="submitAuthCode()">Login</button>
+                        </div>
+                        <div class="auth-actions">
+                            <a href="https://login.ah.nl/secure/oauth/authorize?client_id=appie&redirect_uri=appie://login-exit&response_type=code" target="_blank">Get authorization code</a>
+                        </div>
+                        <div class="auth-error" id="auth-error" style="display: none;"></div>
                     </div>
                 </div>
                 <div class="status-item">
@@ -505,21 +574,89 @@
                 const indicator = document.getElementById('auth-indicator');
                 const status = document.getElementById('auth-status');
                 const syncBtn = document.getElementById('sync-btn');
+                const authForm = document.getElementById('auth-form-container');
+                const logoutBtn = document.getElementById('logout-btn');
 
                 if (data.authenticated) {
                     indicator.className = 'status-indicator ok';
                     status.textContent = 'Connected';
                     syncBtn.style.display = 'block';
+                    authForm.style.display = 'none';
+                    logoutBtn.style.display = 'block';
                 } else {
                     indicator.className = 'status-indicator warning';
                     status.textContent = 'Not authenticated';
                     syncBtn.style.display = 'none';
+                    authForm.style.display = 'block';
+                    logoutBtn.style.display = 'none';
                 }
             } catch (error) {
                 document.getElementById('auth-indicator').className = 'status-indicator error';
                 document.getElementById('auth-status').textContent = 'Error';
             }
         }
+
+        async function submitAuthCode() {
+            const input = document.getElementById('auth-code-input');
+            const btn = document.getElementById('auth-submit-btn');
+            const errorEl = document.getElementById('auth-error');
+            const code = input.value.trim();
+
+            if (!code) {
+                errorEl.textContent = 'Please enter an authorization code.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.textContent = 'Logging in...';
+            btn.disabled = true;
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/receipts/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.detail || `Authentication failed (${response.status})`);
+                }
+
+                input.value = '';
+                checkAuthStatus();
+                loadQuickStats();
+                checkSyncStatus();
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            } finally {
+                btn.textContent = 'Login';
+                btn.disabled = false;
+            }
+        }
+
+        async function logout() {
+            const btn = document.getElementById('logout-btn');
+            btn.textContent = 'Logging out...';
+            btn.disabled = true;
+
+            try {
+                await fetch('/receipts/auth', { method: 'DELETE' });
+                checkAuthStatus();
+            } catch (error) {
+                alert('Logout failed: ' + error.message);
+            } finally {
+                btn.textContent = 'Logout';
+                btn.disabled = false;
+            }
+        }
+
+        // Allow submitting auth code with Enter key
+        document.getElementById('auth-code-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') submitAuthCode();
+        });
 
         async function checkSyncStatus() {
             try {
