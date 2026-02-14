@@ -4,7 +4,7 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATA_DIR = os.environ.get("DATA_DIR", ".")
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
 Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
 DATABASE_URL = f"sqlite:///{DATA_DIR}/receipts.db"
 
