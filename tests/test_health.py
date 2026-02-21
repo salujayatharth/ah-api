@@ -1,6 +1,8 @@
 """
 Tests for health check and basic endpoints.
 """
+from unittest.mock import patch, MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -14,10 +16,24 @@ class TestHealthEndpoint:
         assert response.status_code == 200
 
     def test_health_check_returns_healthy_status(self, client: TestClient):
-        """Test that health check returns healthy status."""
+        """Test that health check returns healthy status with db check."""
         response = client.get("/health")
         data = response.json()
-        assert data == {"status": "healthy"}
+        assert data["status"] == "healthy"
+        assert data["checks"]["database"] == "healthy"
+
+    def test_health_check_unhealthy_database(self, client: TestClient):
+        """Test that health check returns 503 when database is unreachable."""
+        mock_session = MagicMock()
+        mock_session.execute.side_effect = Exception("connection refused")
+
+        with patch("app.main.SessionLocal", return_value=mock_session):
+            response = client.get("/health")
+
+        assert response.status_code == 503
+        data = response.json()
+        assert data["status"] == "unhealthy"
+        assert data["checks"]["database"] == "unhealthy"
 
 
 class TestDashboardEndpoint:

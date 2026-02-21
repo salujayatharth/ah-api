@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -5,11 +6,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
-from app.database import create_tables
+from app.database import create_tables, SessionLocal
 from app.routes import router as receipts_router
 from app.analytics_routes import router as analytics_router
 from app.product_routes import router as products_router
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -44,7 +48,26 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    checks = {"database": "healthy"}
+
+    try:
+        db = SessionLocal()
+        try:
+            db.execute(text("SELECT 1"))
+        finally:
+            db.close()
+    except Exception as e:
+        logger.error("Health check failed: database unreachable: %s", e)
+        checks["database"] = "unhealthy"
+
+    overall = "healthy" if all(v == "healthy" for v in checks.values()) else "unhealthy"
+    status_code = 200 if overall == "healthy" else 503
+
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        content={"status": overall, "checks": checks},
+        status_code=status_code,
+    )
 
 
 @app.get("/dashboard")
